@@ -1,0 +1,27 @@
+{
+  "_comment": "Manual citation metrics fallback. Keys = normKey(title, year, lastName). Run normKey() in browser console to generate keys. All fields optional. Updated entries override Dimensions API data for that key.",
+  "_schema": {
+    "key": "normalized-title-60chars|year|firstAuthorlastname",
+    "googleScholar":    "integer — cited-by count from Google Scholar",
+    "googleScholarUrl": "string  — direct link to GS record (Scholar search or profile)",
+    "dimensions":       "integer — times cited from Dimensions",
+    "dimensionsUrl":    "string  — direct link to Dimensions record",
+    "updatedAt":        "string  — ISO date this entry was last manually updated"
+  },
+  "metrics": {
+    "surface functionalization of twodimensional materials for energy|2021|arramel": {
+      "googleScholar": 48,
+      "googleScholarUrl": "https://scholar.google.com/scholar?q=surface+functionalization+twodimensional+materials+energy",
+      "dimensions": 41,
+      "dimensionsUrl": "https://app.dimensions.ai/details/publication/pub.1136EXAMPLE",
+      "updatedAt": "2026-06-22"
+    },
+    "electronic properties of graphene heterostructures|2023|haposan": {
+      "googleScholar": 12,
+      "googleScholarUrl": "https://scholar.google.com/scholar?q=electronic+properties+graphene+heterostructures",
+      "dimensions": 10,
+      "dimensionsUrl": "https://app.dimensions.ai/details/publication/pub.1999EXAMPLE",
+      "updatedAt": "2026-06-22"
+    }
+  }
+}

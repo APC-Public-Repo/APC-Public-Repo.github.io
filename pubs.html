@@ -227,6 +227,33 @@
         .pubs-bibbase .bibbase_group_whole.bb-collapsed .bibbase_group_head_icon {
             transform: rotate(-90deg);
         }
+
+        /* ── 4-line publication layout ── */
+        /* Line 1: title on its own block */
+        .pubs-bibbase .bibbase_paper_title  { display: block !important; }
+        /* Line 2: authors on own block */
+        .pubs-bibbase .bibbase_paper_author { display: block !important; margin-top: 0.15rem; }
+        /* Line 3: journal (italic, injected by JS) */
+        .pubs-bibbase .pub-journal {
+            display: block;
+            color: #6b7280;
+            font-style: italic;
+            font-size: 0.875rem;
+            margin-top: 0.15rem;
+        }
+        /* Line 4: vol/issue/pages/date (injected by JS) */
+        .pubs-bibbase .pub-meta {
+            display: block;
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.05rem;
+        }
+        /* Guard: prevent theme pseudo-content from leaking into injected lines */
+        .pubs-bibbase .pub-journal::before, .pubs-bibbase .pub-journal::after,
+        .pubs-bibbase .pub-meta::before,    .pubs-bibbase .pub-meta::after {
+            content: none !important;
+            border:  none !important;
+        }
     </style>
 </head>
 <body>
@@ -437,5 +464,107 @@
         </div>
     </footer>
     <script src="https://unpkg.com/flowbite@1.4.1/dist/flowbite.js"></script>
+
+    <script>
+    /* 4-line publication layout transform (post-BibBase render) */
+    (function () {
+        'use strict';
+
+        function reformatPapers() {
+            document.querySelectorAll('.pubs-bibbase .bibbase_paper:not([data-pub-fmt])').forEach(function (paper) {
+
+                /* 1. Find journal node: BibBase uses <em> (or <i>) as direct child of paper */
+                var outerNode = null;
+                for (var c = paper.firstChild; c; c = c.nextSibling) {
+                    if (c.nodeType === 1 && (c.nodeName === 'EM' || c.nodeName === 'I')) {
+                        outerNode = c; break;
+                    }
+                }
+                if (!outerNode) return;
+
+                /* 2. Extract journal text + any meta embedded inside outer node */
+                var journalRaw  = '';
+                var innerMetaRaw = '';
+                if (outerNode.nodeName === 'I') {
+                    var innerEm = outerNode.querySelector('em');
+                    if (innerEm) {
+                        /* <i><em>Journal</em>, meta text...</i> */
+                        journalRaw = innerEm.textContent;
+                        for (var n = innerEm.nextSibling; n; n = n.nextSibling) {
+                            if (n.nodeType === 3) innerMetaRaw += n.textContent;
+                        }
+                    } else {
+                        /* Plain <i>all text</i> — will regex-split below if no trailing nodes */
+                        journalRaw = outerNode.textContent;
+                    }
+                } else {
+                    /* <em>Journal Name</em> — comma & volume live as text node after </em> */
+                    journalRaw = outerNode.textContent;
+                }
+
+                journalRaw = journalRaw.trim();
+                if (!journalRaw) return;
+
+                /* 3. Collect consecutive text nodes after outerNode (stop at any element) */
+                var trailingNodes = [];
+                var trailingRaw   = innerMetaRaw;
+                var cur = outerNode.nextSibling;
+                while (cur) {
+                    if (cur.nodeType === 3) {
+                        trailingNodes.push(cur);
+                        trailingRaw += cur.textContent;
+                        cur = cur.nextSibling;
+                    } else {
+                        break; /* hit action links / well — stop */
+                    }
+                }
+
+                /* 4. Build journal / meta strings */
+                var jText = journalRaw.replace(/[\s,;:]+$/, '') + ',';
+                var mText = trailingRaw.trim().replace(/^[\s,;:]+/, '');
+
+                /* Fallback: if DOM gave no meta, try regex split on journalRaw itself */
+                if (!mText) {
+                    var rx = journalRaw.match(/^([\s\S]+?),\s*(\d[\s\S]{3,})$/);
+                    if (rx) {
+                        jText = rx[1].trim().replace(/[\s,;:]+$/, '') + ',';
+                        mText = rx[2].trim().replace(/^[\s,;:]+/, '');
+                    }
+                }
+
+                /* 5. Idempotency guard — set before any DOM mutation */
+                paper.setAttribute('data-pub-fmt', '1');
+
+                /* 6. Build replacement elements */
+                var jEl = document.createElement('span');
+                jEl.className = 'pub-journal';
+                jEl.textContent = jText;
+
+                var frag = document.createDocumentFragment();
+                frag.appendChild(jEl);
+                if (mText) {
+                    var mEl = document.createElement('span');
+                    mEl.className = 'pub-meta';
+                    mEl.textContent = mText;
+                    frag.appendChild(mEl);
+                }
+
+                /* 7. Remove trailing text nodes, swap outerNode for new elements */
+                trailingNodes.forEach(function (n) { paper.removeChild(n); });
+                paper.replaceChild(frag, outerNode);
+            });
+        }
+
+        /* Piggyback on same render-poll cadence as existing script */
+        var tries = 0;
+        var t = setInterval(function () {
+            tries++;
+            if (document.querySelectorAll('.pubs-bibbase .bibbase_paper').length > 0 || tries >= 50) {
+                clearInterval(t);
+                reformatPapers();
+            }
+        }, 300);
+    })();
+    </script>
 </body>
 </html>
