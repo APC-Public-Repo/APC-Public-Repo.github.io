@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>body { margin: 0; padding: 0; }</style>
+</head>
+<body>
+  <div id="bibbase-container"></div>
+  <script>
+    var origin = window.location.origin;
+    function postHeight() {
+      var h = Math.max(300, document.documentElement.scrollHeight, document.body.scrollHeight);
+      parent.postMessage({ type: 'bibbase-height', height: h }, origin);
+    }
+    var observer = new MutationObserver(postHeight);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    [500, 1000, 2000, 3500, 6000, 10000].forEach(function(ms) { setTimeout(postHeight, ms); });
+    window.addEventListener('load', postHeight);
+  </script>
+  <script src="https://bibbase.org/show?bib=https%3A%2F%2Fbibbase.org%2Fzotero-group%2Ftobiashaposan%2F6590780&jsonp=1"></script>
+</body>
+</html>
