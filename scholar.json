@@ -4,18 +4,16 @@
   "name": "Arramel",
   "affiliations": "Applied Physics and Chemistry Research Group, Nano Center Indonesia",
   "profileUrl": "https://scholar.google.co.id/citations?user=WNCf7lIAAAAJ&hl=en",
-  "citations": 487,
-  "hIndex": 13,
-  "i10Index": 18,
+  "citations": 4801,
+  "hIndex": 37,
+  "i10Index": 79,
   "citationsPerYear": [
-    { "year": 2016, "citations": 8  },
-    { "year": 2017, "citations": 18 },
-    { "year": 2018, "citations": 35 },
-    { "year": 2019, "citations": 58 },
-    { "year": 2020, "citations": 89 },
-    { "year": 2021, "citations": 112 },
-    { "year": 2022, "citations": 96 },
-    { "year": 2023, "citations": 58 },
-    { "year": 2024, "citations": 13 }
+    { "year": 2019, "citations": 73  },
+    { "year": 2020, "citations": 131 },
+    { "year": 2021, "citations": 277 },
+    { "year": 2022, "citations": 438 },
+    { "year": 2023, "citations": 585 },
+    { "year": 2024, "citations": 964 },
+    { "year": 2025, "citations": 1498 }
   ]
 }

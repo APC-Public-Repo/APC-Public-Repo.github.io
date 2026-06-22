@@ -406,6 +406,52 @@
             .sm-card-label  { font-size: .55rem; }
             .sm-card-value  { font-size: 1.3rem; }
         }
+
+        /* ══════════════════════════════════════════════════════════════════
+           BibBase interference shield
+           ──────────────────────────────────────────────────────────────────
+           Root cause A — FOUC:
+             The <link href="output.css"> is render-blocking, but on slow
+             connections HTML paints first (no CSS). .hidden hasn't applied yet
+             so #hero-cover-wrap is briefly visible, then hides when CSS lands.
+             Fix: mirror hidden/lg:flex here in this <style> block, which the
+             CSSOM applies SYNCHRONOUSLY during HTML parse — zero FOUC.
+
+           Root cause B — BibBase jQuery .hide():
+             bibbase.min.js calls $('img').hide() globally during init, which
+             adds style="display:none" (author-normal, inline). The existing fix
+             (.pubs-bibbase img { display:inline !important }) only covers images
+             inside the bibliography container. The logo and cover image sit
+             outside it and remain hidden after BibBase restores only its own.
+             Fix: author !important > author-normal inline (CSS cascade §6.4.2).
+             No specificity battle needed — !important at author level always
+             beats a non-!important inline style.
+
+           Root cause C — BibBase overlay z-index:
+             bibbase.min.js may inject a position:fixed loading spinner/overlay
+             with a high z-index. <header class="fixed"> has no z-index set,
+             so it falls behind. Fix: explicit z-index on header.
+           ══════════════════════════════════════════════════════════════════ */
+
+        /* (C) Keep navbar above any BibBase-injected overlay */
+        header { z-index: 100; }
+
+        /* (A) FOUC guard — mirror .hidden / lg:flex WITHOUT waiting for output.css.
+               This <style> block is in <head> → CSSOM-synchronous → no flash. */
+        #hero-cover-wrap { display: none; }
+        @media (min-width: 1024px) {
+            #hero-cover-wrap { display: flex; gap: 2rem; }
+        }
+
+        /* (B) BibBase jQuery .hide() shield.
+               Author !important beats jQuery's inline style="display:none".
+               Also guard visibility + opacity in case BibBase uses those instead. */
+        header img,
+        #hero-cover-wrap img {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
     </style>
 </head>
 <body>
@@ -530,7 +576,7 @@
 
                 <br>
 
-                <div class="hidden lg:mt-0 lg:col-span-5 lg:flex lg:gap-8">
+                <div id="hero-cover-wrap" class="hidden lg:mt-0 lg:col-span-5 lg:flex lg:gap-8">
 
                     <!-- Item 1 -->
                     <div class="flex flex-col items-center">
