@@ -461,7 +461,122 @@
     </script>
     <script src="https://unpkg.com/flowbite@1.4.1/dist/flowbite.js"></script>
 
-    
+    <!-- ── Google Scholar Metrics Loader ──────────────────────────────────
+         Data source : ./scholar.json  (static file, update values manually)
 
+         FUTURE — server endpoint:
+           Replace DATA_URL with '/api/scholar' once you add a backend route.
+           The endpoint must return the same JSON shape as scholar.json.
+
+         FUTURE — automatic updates:
+           Add .github/workflows/update-scholar.yml with a cron trigger.
+           The workflow runs a script (e.g. scripts/fetch-scholar.js using
+           Playwright) that logs into Scholar, scrapes the metrics, writes
+           scholar.json, and commits the result.  Vercel redeploys on push.
+         ──────────────────────────────────────────────────────────────────── -->
+    <script>
+    (function () {
+        'use strict';
+
+        /* ── interface ScholarData {
+               citations      : number;
+               hIndex         : number;
+               i10Index       : number;
+               citationsPerYear: { year: number; citations: number; }[];
+           } ── */
+
+        var DATA_URL = './scholar.json';
+
+        /* Animated counter — ease-out cubic, duration ms */
+        function countUp(el, target, ms) {
+            var t0 = null;
+            (function tick(ts) {
+                if (!t0) t0 = ts;
+                var p    = Math.min((ts - t0) / ms, 1);
+                var ease = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(ease * target);
+                if (p < 1) requestAnimationFrame(tick);
+            }(performance.now()));
+        }
+
+        /* Chart.js line + filled area */
+        function drawChart(data) {
+            var canvas = document.getElementById('scholar-chart');
+            if (!canvas || !window.Chart) return;
+            var dark  = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var grid  = dark ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.05)';
+            var ticks = dark ? '#9ca3af' : '#6b7280';
+            var line  = dark ? '#a78bfa' : '#7c3aed';
+            var fill  = dark ? 'rgba(167,139,250,.15)' : 'rgba(124,58,237,.1)';
+            new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: data.citationsPerYear.map(function (d) { return d.year; }),
+                    datasets: [{
+                        data:                 data.citationsPerYear.map(function (d) { return d.citations; }),
+                        borderColor:          line,
+                        backgroundColor:      fill,
+                        borderWidth:          2.5,
+                        fill:                 true,
+                        tension:              0.4,
+                        pointBackgroundColor: line,
+                        pointRadius:          4,
+                        pointHoverRadius:     6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: dark ? '#1f2937' : '#fff',
+                            titleColor:      dark ? '#f9fafb' : '#111827',
+                            bodyColor:       dark ? '#9ca3af' : '#6b7280',
+                            borderColor:     dark ? '#374151' : '#e5e7eb',
+                            borderWidth:     1,
+                            callbacks: {
+                                label: function (i) { return i.parsed.y + ' citations'; }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: grid }, ticks: { color: ticks, font: { size: 11 } } },
+                        y: { grid: { color: grid }, ticks: { color: ticks, font: { size: 11 } }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function render(d) {
+            var skel    = document.getElementById('scholar-skeleton');
+            var content = document.getElementById('scholar-content');
+            if (!skel || !content) return;
+            skel.style.display    = 'none';
+            content.style.display = 'block';
+            countUp(document.getElementById('metric-citations'), d.citations,  1200);
+            countUp(document.getElementById('metric-hindex'),    d.hIndex,      900);
+            countUp(document.getElementById('metric-i10'),       d.i10Index,   1000);
+            drawChart(d);
+        }
+
+        function init() {
+            if (!document.getElementById('scholar-skeleton')) return;
+            /* FUTURE: swap DATA_URL → '/api/scholar' for live endpoint */
+            fetch(DATA_URL)
+                .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(render)
+                .catch(function () {
+                    /* On error: silently hide skeleton (don't break page) */
+                    var skel = document.getElementById('scholar-skeleton');
+                    if (skel) skel.style.display = 'none';
+                });
+        }
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
+    }());
+    </script>
+    
 </body>
 </html>
