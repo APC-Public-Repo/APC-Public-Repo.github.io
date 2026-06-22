@@ -13,10 +13,6 @@
     <!-- Chart.js — powers Google Scholar citations-by-year chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
-    <style>
-   
-
-    </style>
 </head>
 <body>
     <header class="fixed w-full">
@@ -99,75 +95,7 @@
         </div>
     </section>
 
-    <script>
-    (function () {
-        'use strict';
-
-        /* FIX 2+3: Fallback behavior functions.
-           BibBase's bibbase.min.js redefines these with bb$ if it loads.
-           If the script fails (protocol-relative URL, CSP, network), our
-           implementations keep toggles working via plain DOM. */
-        if (typeof window.showBib !== 'function') {
-            window.showBib = function (e) {
-                e.preventDefault();
-                var el = e.target;
-                while (el && !el.classList.contains('bibbase_paper')) el = el.parentElement;
-                if (!el) return;
-                var well = el.querySelector('div.well[data-type="bibtex"]');
-                if (!well) return;
-                well.style.display = (well.style.display === 'none' || well.style.display === '') ? 'block' : 'none';
-            };
-        }
-        if (typeof window.showAbstract !== 'function') {
-            window.showAbstract = function (e) {
-                e.preventDefault();
-                var el = e.target;
-                while (el && !el.classList.contains('bibbase_paper')) el = el.parentElement;
-                if (!el) return;
-                var well = el.querySelector('div.well[data-type="abstract"]');
-                if (!well) return;
-                well.style.display = (well.style.display === 'none' || well.style.display === '') ? 'block' : 'none';
-            };
-        }
-        if (typeof window.toggleGroup !== 'function') {
-            window.toggleGroup = function (id) {
-                var body = document.querySelector('#' + id + ' .bibbase_group_body');
-                if (!body) return;
-                var whole = document.getElementById(id);
-                var isVisible = body.style.display !== 'none';
-                body.style.display = isVisible ? 'none' : '';
-                if (whole) whole.classList.toggle('bb-collapsed', isVisible);
-            };
-        }
-
-        /* Poll for render, then normalize inline styles */
-        var tries = 0;
-        var timer = setInterval(function () {
-            tries++;
-            var papers = document.querySelectorAll('.pubs-bibbase .bibbase_paper');
-            if (papers.length > 0 || tries >= 40) {
-                clearInterval(timer);
-
-                /* Forcibly kill spinner — CSS #spinner rule handles the normal case
-                   but explicit removal covers any edge case BibBase re-shows it */
-                var spinner = document.getElementById('spinner');
-                if (spinner) spinner.style.setProperty('display', 'none', 'important');
-
-                /* img.bibbase_icon alt="Title [link]" → duplicate title when
-                   //bibbase.org/img/... fails on file:// or network-blocked */
-                document.querySelectorAll('.pubs-bibbase img.bibbase_icon').forEach(function (img) {
-                    img.onerror = function () { this.alt = ''; this.style.display = 'none'; };
-                    if (img.complete && img.naturalWidth === 0) { img.alt = ''; img.style.display = 'none'; }
-                });
-
-                /* BibBase may set overflow:hidden on paper rows inline */
-                papers.forEach(function (el) {
-                    if (el.style.overflow === 'hidden') el.style.overflow = 'visible';
-                });
-            }
-        }, 250);
-    })();
-    </script>
+    <script src="https://bibbase.org/show?bib=https%3A%2F%2Fbibbase.org%2Fzotero-group%2Ftobiashaposan%2F6590780&jsonp=1"></script> 
 
     <!-- Footer -->
     <footer class="bg-white dark:bg-gray-800">
