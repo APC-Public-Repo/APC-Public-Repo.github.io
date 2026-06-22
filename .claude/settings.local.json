@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(academic-research-skills:ars-lit-review)",
+      "WebSearch",
+      "Bash(not exist *)",
+      "WebFetch(domain:bibbase.org)",
+      "Bash(curl -s \"https://bibbase.org/show?bib=https%3A%2F%2Fbibbase.org%2Fzotero-group%2Ftobiashaposan%2F6590780\")",
+      "Bash(curl -s \"https://bibbase.org/js/bibbase.min.js\")",
+      "Bash(grep -oP '\\(showBib|showAbstract|toggleGroup|spinner\\)[^;]{0,200}')"
+    ]
+  },
+  "enabledPlugins": {
+    "academic-research-skills@academic-research-skills": true
+  }
+}

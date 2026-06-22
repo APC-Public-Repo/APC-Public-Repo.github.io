@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+ <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publications | APC Research Group</title>
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <link href="./output.css" rel="stylesheet">
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+    <style>
+        /* ================================================================
+           .pubs-bibbase — Tailwind Preflight isolation + BibBase theme
+           DOM verified from live BibBase HTML (June 2026):
+             year group   → div.bibbase_group_whole > div.bibbase_group
+             paper row    → div.bibbase_paper
+             title        → span.bibbase_paper_titleauthoryear > span.bibbase_paper_title > a
+             authors      → span.bibbase_paper_titleauthoryear > span.bibbase_paper_author
+             journal      → <i> direct child of div.bibbase_paper
+             links row    → span.bibbase_paper_content.dontprint > a  (NOT small a)
+             paper icon   → img.bibbase_icon  (alt = full title text — DO NOT show on break)
+             bibtex/abs   → div.well.well-small.bibbase[data-type="bibtex/abstract"]
+           ================================================================ */
+
+        /* Wrapper card */
+        .pubs-bibbase {
+            background: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+            padding: 2rem 2.5rem;
+            overflow: visible;   /* NOT overflow-x:auto — promotes y→auto, clips BibBase abs children */
+            position: relative;
+        }
+        @media (max-width: 640px) {
+            .pubs-bibbase { padding: 1.25rem 1rem; }
+        }
+
+        /* ── Tailwind Preflight undos (all scoped) ── */
+
+        /* FIX: a{color:inherit; text-decoration:inherit} — all BibBase links go gray/invisible */
+        .pubs-bibbase a { color: #7c3aed; text-decoration: none; cursor: pointer; }
+        .pubs-bibbase a:hover { color: #6d28d9; text-decoration: underline; }
+
+        /* FIX: h1-h6{font-size:inherit; font-weight:inherit} */
+        .pubs-bibbase h1 { font-size: 2em;    font-weight: bold; margin: 0.67em 0; }
+        .pubs-bibbase h2 { font-size: 1.5em;  font-weight: bold; margin: 0.83em 0; }
+        .pubs-bibbase h3 { font-size: 1.17em; font-weight: bold; margin: 1em 0; }
+        .pubs-bibbase h4 { font-size: 1em;    font-weight: bold; margin: 1.33em 0; }
+
+        /* FIX: ol,ul,menu{list-style:none; margin:0; padding:0} */
+        .pubs-bibbase ul { list-style: disc;    padding-left: 2em; margin: 0.5em 0; }
+        .pubs-bibbase ol { list-style: decimal; padding-left: 2em; margin: 0.5em 0; }
+        .pubs-bibbase li { margin: 0; padding: 0; }
+
+        /* FIX: img,svg{display:block}
+           CRITICAL — img.bibbase_icon has alt="Title [link]".
+           display:block promotes <img> to a block line → alt text renders
+           as a full-width duplicate title when image breaks on file:// protocol.
+           display:inline keeps img in normal text flow → no phantom title. */
+        .pubs-bibbase img { display: inline !important; vertical-align: middle; max-width: none; height: auto; }
+        .pubs-bibbase svg { display: inline !important; vertical-align: middle; }
+
+        /* FIX: *{border-style:solid; border-color:#E5E7EB} — unexpected borders everywhere */
+        .pubs-bibbase *,
+        .pubs-bibbase *::before,
+        .pubs-bibbase *::after {
+            border-style: none;
+            border-color: transparent;
+        }
+
+        /* FIX: BibBase own CSS adds a::before content:'|' between action links → vertical bars */
+        .pubs-bibbase a::before,
+        .pubs-bibbase a::after { content: none !important; border: none !important; }
+
+        /* ── Year groups ── */
+        .pubs-bibbase .bibbase_group_whole { margin-bottom: 0; }
+        .pubs-bibbase .bibbase_group_whole:first-child .bibbase_group { margin-top: 0; }
+
+        .pubs-bibbase .bibbase_group {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            user-select: none;
+            color: #6d28d9;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-bottom: 2px solid #ede9fe !important;
+            border-style: solid !important;
+            padding: 0.6rem 0;
+            margin-top: 2rem;
+            line-height: 1.3;
+            letter-spacing: 0.01em;
+        }
+        .pubs-bibbase .bibbase_group:hover { color: #7c3aed; }
+        .pubs-bibbase .bibbase_group_count { color: #9ca3af; font-weight: 400; font-size: 0.875rem; }
+        .pubs-bibbase .bibbase_group_head_icon { color: #a78bfa; font-size: 0.85em; }
+        .pubs-bibbase .bibbase_group_body { padding-bottom: 0.5rem; }
+
+        /* ── Paper rows ── */
+        .pubs-bibbase .bibbase_paper {
+            display: block;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f3f4f6 !important;
+            border-style: solid !important;
+            line-height: 1.65;
+            overflow: visible;
+            position: relative;
+        }
+        .pubs-bibbase .bibbase_paper:last-of-type { border-bottom: none !important; }
+
+        /* Title+Authors block (outer span → make block) */
+        .pubs-bibbase .bibbase_paper_titleauthoryear { display: block; margin-bottom: 0.1rem; }
+
+        /* Title inline — bold distinguishes it; authors follow on same line.
+           Journal <i> is OUTSIDE titleauthoryear → lands on next line naturally. */
+        .pubs-bibbase .bibbase_paper_title { display: inline; }
+        .pubs-bibbase .bibbase_paper_title a {
+            color: #111827 !important;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none !important;
+        }
+        .pubs-bibbase .bibbase_paper_title a:hover {
+            color: #7c3aed !important;
+            text-decoration: underline !important;
+        }
+
+        /* Authors inline after title */
+        .pubs-bibbase .bibbase_paper_author { display: inline; color: #4b5563; font-size: 0.875rem; }
+
+        /* Journal <i> (direct child of bibbase_paper, outside titleauthoryear) */
+        .pubs-bibbase .bibbase_paper > i { color: #6b7280; font-style: italic; font-size: 0.875rem; }
+
+        /* Empty note spans */
+        .pubs-bibbase .note,
+        .pubs-bibbase .bibbase_note { display: none; }
+
+        /* ── Action links row ──
+           ACTUAL selector: span.bibbase_paper_content.dontprint > a
+           BibBase has NO <small> tags — previous small-a rules were dead code. */
+        .pubs-bibbase span.bibbase_paper_content.dontprint {
+            display: block;
+            margin-top: 0.45rem;
+            line-height: 2.2;
+            color: #e5e7eb;   /* fades &nbsp; spacer text nodes between links */
+        }
+        .pubs-bibbase span.bibbase_paper_content.dontprint > a {
+            display: inline-block !important;
+            color: #7c3aed !important;
+            font-size: 0.72rem !important;
+            font-weight: 500 !important;
+            text-decoration: none !important;
+            padding: 0.12rem 0.6rem !important;
+            border-radius: 0.3rem !important;
+            border: 1px solid #ede9fe !important;
+            border-style: solid !important;
+            margin-right: 0.3rem !important;
+            margin-bottom: 0.25rem !important;
+            background: #faf5ff !important;
+            vertical-align: middle !important;
+            cursor: pointer !important;
+            white-space: nowrap !important;
+            transition: background 0.15s;
+        }
+        .pubs-bibbase span.bibbase_paper_content.dontprint > a:hover {
+            background: #ede9fe !important;
+            text-decoration: none !important;
+        }
+
+        /* Paper icon — suppress alt text (= full title) when image breaks */
+        .pubs-bibbase img.bibbase_icon {
+            display: inline-block !important;
+            max-height: 1em !important;
+            width: auto !important;
+            height: auto !important;
+            vertical-align: middle !important;
+            margin-right: 0.2em;
+            font-size: 0 !important;        /* kills broken-image alt text rendering */
+            color: transparent !important;
+            overflow: hidden;
+        }
+        .pubs-bibbase span.bibbase_icon_text { font-size: 0.72rem; vertical-align: middle; }
+        .pubs-bibbase .fa { font-size: inherit !important; color: inherit !important; }
+
+        /* ── BibTeX / Abstract expanded blocks ──
+           ACTUAL selector: div.well.well-small.bibbase (NOT .abstract / .bibtex) */
+        .pubs-bibbase div.well.bibbase {
+            background: #f9fafb !important;
+            border-left: 3px solid #7c3aed !important;
+            border-top: none !important;
+            border-right: none !important;
+            border-bottom: none !important;
+            border-style: solid !important;
+            border-radius: 0 0.375rem 0.375rem 0 !important;
+            padding: 0.75rem 1rem !important;
+            margin-top: 0.5rem !important;
+            box-shadow: none !important;
+        }
+        .pubs-bibbase div.well.bibbase pre {
+            font-size: 0.8rem; line-height: 1.6; color: #4b5563;
+            white-space: pre-wrap; word-break: break-word;
+            margin: 0; padding: 0; background: transparent; border: none;
+        }
+        .pubs-bibbase div.well.bibbase p {
+            font-size: 0.875rem; line-height: 1.65; color: #4b5563; margin: 0;
+        }
+
+        /* BibBase branding */
+        .pubs-bibbase #bibbase_header,
+        .pubs-bibbase .bibbase_header,
+        .pubs-bibbase .bibbase_footer { display: none !important; }
+
+        /* FIX 1: Spinner always hidden in our embed.
+           .pubs-bibbase img{display:inline!important} beats jQuery's .hide()
+           because !important overrides inline style="display:none". Higher-
+           specificity id selector with !important wins over the tag rule. */
+        .pubs-bibbase #spinner { display: none !important; }
+
+        /* Year group icon rotation for collapsed state */
+        .pubs-bibbase .bibbase_group_head_icon {
+            transition: transform 0.2s ease;
+        }
+        .pubs-bibbase .bibbase_group_whole.bb-collapsed .bibbase_group_head_icon {
+            transform: rotate(-90deg);
+        }
+    </style>
+</head>
+<body>
+    <header class="fixed w-full">
+        <nav class="bg-white border-gray-200 py-2.5 dark:bg-gray-900">
+            <div class="flex flex-wrap items-center justify-between max-w-screen-xl px-4 mx-auto">
+                <a href="/index.html" class="flex items-center">
+                    <img src="./images/logo.svg" class="h-6 mr-3 sm:h-9" alt="Landwind Logo" />
+                </a>
+                <div class="flex items-center lg:order-2">
+                    <a href="https://management.apcresearch.org/career/openings" class="text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 sm:mr-2 lg:mr-0 dark:bg-purple-600 dark:hover:bg-purple-700 focus:outline-none dark:focus:ring-purple-800">Openings</a>
+                    <button data-collapse-toggle="mobile-menu-2" type="button" class="inline-flex items-center p-2 ml-1 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="mobile-menu-2" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                        <svg class="hidden w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+                <div class="items-center justify-between hidden w-full lg:flex lg:w-auto lg:order-1" id="mobile-menu-2">
+                    <ul class="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0">
+                        <li>
+                            <a href="https://management.apcresearch.org/people" class="block py-2 pl-3 pr-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-purple-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">People</a>
+                        </li>
+                        <li>
+                            <a href="pi.html" class="block py-2 pl-3 pr-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-purple-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">PI</a>
+                        </li>
+                        <li>
+                            <a href="https://portfolio.apcresearch.org/" class="block py-2 pl-3 pr-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-purple-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">Portfolio</a>
+                        </li>
+                        <!--<li>
+                            <a href="https://management.apcresearch.org/career/openings" class="block py-2 pl-3 pr-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-purple-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">Career</a>
+                        </li>-->
+                        <li>
+                            <a href="https://apcresearch.substack.com/" class="block py-2 pl-3 pr-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-purple-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">Blog/Substack</a>
+                        </li>
+                        <li>
+                            <a href="https://management.apcresearch.org/resources/h" class="block py-2 pl-3 pr-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-purple-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">Resources</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="bg-white dark:bg-gray-900">
+        <div class="grid max-w-screen-xl px-4 pt-20 pb-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12 lg:pt-28">
+            <div class="mr-auto place-self-center lg:col-span-7">
+                <h1 class="max-w-2xl mb-4 text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-6xl dark:text-white">Publications</h1>
+                <p class="max-w-2xl font-light text-gray-500 md:text-lg dark:text-gray-400">Full list of publications from the APC Research Group, sourced live from Zotero.</p>
+            </div>
+            <div class="hidden lg:mt-0 lg:col-span-5 lg:flex"></div>
+        </div>
+    </section>
+
+    <!-- Publications -->
+    <section class="bg-gray-50 dark:bg-gray-800">
+        <div class="max-w-screen-xl px-4 py-8 mx-auto lg:py-16 lg:px-6">
+            <div class="pubs-bibbase" id="bibbase-container">
+                <script src="https://bibbase.org/show?bib=https%3A%2F%2Fbibbase.org%2Fzotero-group%2Ftobiashaposan%2F6590780&jsonp=1"></script>
+            </div>
+        </div>
+    </section>
+
+    <script>
+    (function () {
+        'use strict';
+
+        /* FIX 2+3: Fallback behavior functions.
+           BibBase's bibbase.min.js redefines these with bb$ if it loads.
+           If the script fails (protocol-relative URL, CSP, network), our
+           implementations keep toggles working via plain DOM. */
+        if (typeof window.showBib !== 'function') {
+            window.showBib = function (e) {
+                e.preventDefault();
+                var el = e.target;
+                while (el && !el.classList.contains('bibbase_paper')) el = el.parentElement;
+                if (!el) return;
+                var well = el.querySelector('div.well[data-type="bibtex"]');
+                if (!well) return;
+                well.style.display = (well.style.display === 'none' || well.style.display === '') ? 'block' : 'none';
+            };
+        }
+        if (typeof window.showAbstract !== 'function') {
+            window.showAbstract = function (e) {
+                e.preventDefault();
+                var el = e.target;
+                while (el && !el.classList.contains('bibbase_paper')) el = el.parentElement;
+                if (!el) return;
+                var well = el.querySelector('div.well[data-type="abstract"]');
+                if (!well) return;
+                well.style.display = (well.style.display === 'none' || well.style.display === '') ? 'block' : 'none';
+            };
+        }
+        if (typeof window.toggleGroup !== 'function') {
+            window.toggleGroup = function (id) {
+                var body = document.querySelector('#' + id + ' .bibbase_group_body');
+                if (!body) return;
+                var whole = document.getElementById(id);
+                var isVisible = body.style.display !== 'none';
+                body.style.display = isVisible ? 'none' : '';
+                if (whole) whole.classList.toggle('bb-collapsed', isVisible);
+            };
+        }
+
+        /* Poll for render, then normalize inline styles */
+        var tries = 0;
+        var timer = setInterval(function () {
+            tries++;
+            var papers = document.querySelectorAll('.pubs-bibbase .bibbase_paper');
+            if (papers.length > 0 || tries >= 40) {
+                clearInterval(timer);
+
+                /* Forcibly kill spinner — CSS #spinner rule handles the normal case
+                   but explicit removal covers any edge case BibBase re-shows it */
+                var spinner = document.getElementById('spinner');
+                if (spinner) spinner.style.setProperty('display', 'none', 'important');
+
+                /* img.bibbase_icon alt="Title [link]" → duplicate title when
+                   //bibbase.org/img/... fails on file:// or network-blocked */
+                document.querySelectorAll('.pubs-bibbase img.bibbase_icon').forEach(function (img) {
+                    img.onerror = function () { this.alt = ''; this.style.display = 'none'; };
+                    if (img.complete && img.naturalWidth === 0) { img.alt = ''; img.style.display = 'none'; }
+                });
+
+                /* BibBase may set overflow:hidden on paper rows inline */
+                papers.forEach(function (el) {
+                    if (el.style.overflow === 'hidden') el.style.overflow = 'visible';
+                });
+            }
+        }, 250);
+    })();
+    </script>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800">
+        <div class="max-w-screen-xl p-4 py-6 mx-auto lg:py-16 md:p-8 lg:p-10">
+            <div class="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-5">
+                <div>
+                    <h3 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Connect with us</h3>
+                    <ul class="text-gray-500 dark:text-gray-400">
+                        <!-- <li class="mb-4">
+                            <a href="https://nano.or.id/" class=" hover:underline">Parent organisation</a>
+                        </li> -->
+                        <li class="mb-4">
+                            <a href="https://nig.co.id" class="hover:underline">Parent company</a>
+                        </li>
+                        <li class="mb-4">
+                            <a href="https://management.apcresearch.org/" class="hover:underline">Internal management documentation</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Social media accounts</h3>
+                    <ul class="text-gray-500 dark:text-gray-400">
+                        <li class="mb-4">
+                            <a href="https://www.researchgate.net/lab/Applied-Physics-and-Chemistry-NCI-Arramel-Arramel" class="hover:underline">ResearchGate</a>
+                        </li>
+                        <li class="mb-4">
+                            <a href="https://twitter.com/APC_NCI" class="hover:underline">X/Twitter</a>
+                        </li>
+                        <li class="mb-4">
+                            <a href="https://www.linkedin.com/company/nano-center-indonesia/mycompany/" class="hover:underline">LinkedIn</a>
+                        </li>
+                        <li class="mb-4">
+                            <a href="https://www.instagram.com/apc.nanocenter/" class="hover:underline">Instagram</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Legal</h3>
+                    <ul class="text-gray-500 dark:text-gray-400">
+                        <li class="mb-4">
+                            <a href="https://management.apcresearch.org/v/apc-privacy-policy" class="hover:underline">Privacy policy</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Commercial</h3>
+                    <ul class="text-gray-500 dark:text-gray-400">
+                        <li class="mb-4">
+                            <a href="https://nig.co.id/__trashed-3/" class="hover:underline">List of commercial services</a>
+                        </li>
+                        <li class="mb-4">
+                            <a href="https://nanocenter.id/services.html" class="hover:underline">Contact via parent organisation</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Others</h3>
+                    <ul class="text-gray-500 dark:text-gray-400">
+                        <li class="mb-4">
+                            <a href="https://management.apcresearch.org/resources/lab/raman" class="hover:underline">Raman Spectroscopy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8">
+            <div class="text-center">
+                <a href="#" class="flex items-center justify-center mb-5 text-2xl font-semibold text-gray-900 dark:text-white">
+                    <img src="./images/logo.svg" class="h-6 mr-3 sm:h-9" alt="Landwind Logo" />
+                </a>
+                <span class="block text-sm text-center text-gray-500 dark:text-gray-400">
+                    Yayasan Pusat Penelitian dan Pengembangan Nanoteknologi Indonesia<br>
+                    Gd. Nanoplex, Jl. Raya Puspiptek A12, Tangerang Selatan 15314, Indonesia<br>
+                    This landing page is built with <a href="https://flowbite.com" class="text-purple-600 hover:underline dark:text-purple-500">Flowbite</a> and <a href="https://tailwindcss.com" class="text-purple-600 hover:underline dark:text-purple-500">Tailwind CSS</a>.
+                </span>
+            </div>
+        </div>
+    </footer>
+    <script src="https://unpkg.com/flowbite@1.4.1/dist/flowbite.js"></script>
+</body>
+</html>
