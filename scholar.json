@@ -1,0 +1,21 @@
+{
+  "_note": "UPDATE THESE VALUES from https://scholar.google.co.id/citations?user=WNCf7lIAAAAJ — open the profile, read All-time metrics (Citations / h-index / i10-index) and the citations-by-year bar chart, then edit this file.",
+  "_apiHint": "Future server endpoint: in scholar-loader.js replace DATA_URL with '/api/scholar'. Schedule auto-updates via GitHub Actions cron that runs scripts/fetch-scholar.js (headless Playwright scrape) and commits this file.",
+  "name": "Arramel",
+  "affiliations": "Applied Physics and Chemistry Research Group, Nano Center Indonesia",
+  "profileUrl": "https://scholar.google.co.id/citations?user=WNCf7lIAAAAJ&hl=en",
+  "citations": 487,
+  "hIndex": 13,
+  "i10Index": 18,
+  "citationsPerYear": [
+    { "year": 2016, "citations": 8  },
+    { "year": 2017, "citations": 18 },
+    { "year": 2018, "citations": 35 },
+    { "year": 2019, "citations": 58 },
+    { "year": 2020, "citations": 89 },
+    { "year": 2021, "citations": 112 },
+    { "year": 2022, "citations": 96 },
+    { "year": 2023, "citations": 58 },
+    { "year": 2024, "citations": 13 }
+  ]
+}
