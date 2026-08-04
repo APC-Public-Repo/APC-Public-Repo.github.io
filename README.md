@@ -1,22 +1,11 @@
-Build with Landwind-Tailwind CSS template.
 
-Straightforward. Open index.html and navigate the web. No installations necessary.
+  # Website Prototype for APC Research
 
-### Integration with BibBase
-Use the following to display BibBase content.
+  This is a code bundle for Website Prototype for APC Research. The original project is available at https://www.figma.com/design/ao6rFgp1icmSwKeK7KpIvo/Website-Prototype-for-APC-Research.
 
-JavaScript (easiest)
-```
-<script src="https://bibbase.org/show?bib=https%3A%2F%2Fbibbase.org%2Fzotero-group%2Ftobiashaposan%2F6590780&jsonp=1"></script>
-```
+  ## Running the code
 
-PHP
-```
-<?php $contents = file_get_contents("https://bibbase.org/show?bib=https%3A%2F%2Fbibbase.org%2Fzotero-group%2Ftobiashaposan%2F6590780"); print_r($contents); ?>
-```
-iFrame (not recommended)
-```
-<iframe src="https://bibbase.org/show?bib=https%3A%2F%2Fbibbase.org%2Fzotero-group%2Ftobiashaposan%2F6590780"></iframe>
-```
+  Run `npm i` to install the dependencies.
 
-For more details see the documention. 
+  Run `npm run dev` to start the development server.
+  

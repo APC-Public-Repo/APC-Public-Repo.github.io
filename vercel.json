@@ -1,4 +1,23 @@
 {
-    "public": false,
-    "cleanUrls": true
-  }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/pubs", "destination": "/publications" },
+    { "source": "/collab", "destination": "/partnership" },
+    { "source": "/zArchived", "destination": "/publications" },
+    { "source": "/join-discord", "destination": "/contact" }
+  ],
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}
