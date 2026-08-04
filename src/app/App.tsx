@@ -25,6 +25,18 @@ const pagePaths: Record<PageType, string> = {
   credits: '/credits',
 };
 
+const siteName = 'Applied Physics & Chemistry, Nano Center Indonesia';
+
+const pageTitles: Record<PageType, string> = {
+  home: 'Home',
+  publications: 'Publications',
+  news: 'News',
+  partnership: 'Partnership',
+  contact: 'Contact',
+  pi: 'Principal Investigator',
+  credits: 'Credits',
+};
+
 // '' at the domain root, '/repo' on a GitHub Pages project site.
 const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
@@ -59,6 +71,10 @@ export default function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  useEffect(() => {
+    document.title = `${pageTitles[currentPage]} | ${siteName}`;
+  }, [currentPage]);
 
   const handleNavigate = (page: PageType) => {
     if (page !== currentPage) {
