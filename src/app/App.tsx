@@ -23,8 +23,15 @@ const pagePaths: Record<PageType, string> = {
   pi: '/pi',
 };
 
+// '' at the domain root, '/repo' on a GitHub Pages project site.
+const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
+
+const urlFor = (page: PageType) => basePath + pagePaths[page];
+
 function getPageFromPath(pathname: string): PageType {
-  const path = pathname.replace(/\/+$/, '') || '/';
+  const path =
+    (pathname.startsWith(basePath) ? pathname.slice(basePath.length) : pathname)
+      .replace(/\/+$/, '') || '/';
   const entry = (Object.entries(pagePaths) as [PageType, string][]).find(
     ([, p]) => p === path,
   );
@@ -41,7 +48,7 @@ export default function App() {
 
   useEffect(() => {
     // Unknown path (or /index.html) falls back to home – keep URL honest.
-    window.history.replaceState(null, '', pagePaths[currentPage]);
+    window.history.replaceState(null, '', urlFor(currentPage));
 
     const handlePopState = () => {
       setCurrentPage(getPageFromPath(window.location.pathname));
@@ -53,7 +60,7 @@ export default function App() {
 
   const handleNavigate = (page: PageType) => {
     if (page !== currentPage) {
-      window.history.pushState(null, '', pagePaths[page]);
+      window.history.pushState(null, '', urlFor(page));
       setCurrentPage(page);
     }
 

@@ -17,6 +17,10 @@ function figmaAssetResolver() {
 }
 
 export default defineConfig({
+  // GitHub Pages project sites serve from /<repo>/. The workflow passes
+  // BASE_PATH from actions/configure-pages (empty for custom domains).
+  base: (process.env.BASE_PATH || '/').replace(/\/*$/, '/'),
+
   plugins: [
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
