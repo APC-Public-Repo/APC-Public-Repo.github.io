@@ -4,4 +4,5 @@ export type PageType =
   | "news"
   | "partnership"
   | "contact"
-  | "pi";
+  | "pi"
+  | "credits";

@@ -1,4 +1,6 @@
-export function Footer() {
+import type { PageType } from "../types/navigation";
+
+export function Footer({ onNavigate }: { onNavigate: (page: PageType) => void }) {
   return (
     <footer className="bg-[#1E3A5F] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -95,6 +97,14 @@ export function Footer() {
                 <a href="https://management.apcresearch.org/resources/lab/raman" className="text-white/70 hover:text-[#2D9CDB] transition-colors text-sm">
                   Raman Spectroscopy
                 </a>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate("credits")}
+                  className="text-white/70 hover:text-[#2D9CDB] transition-colors text-sm"
+                >
+                  Credits
+                </button>
               </li>
             </ul>
           </div>

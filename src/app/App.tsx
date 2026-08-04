@@ -12,6 +12,7 @@ import { PublicationsPage } from './components/PublicationsPage';
 import { PartnershipPage } from './components/PartnershipPage';
 import { ContactPage } from './components/ContactPage';
 import { PIPage } from './components/PIPage';
+import { CreditsPage } from './components/CreditsPage';
 import type { PageType } from './types/navigation';
 
 const pagePaths: Record<PageType, string> = {
@@ -21,6 +22,7 @@ const pagePaths: Record<PageType, string> = {
   partnership: '/partnership',
   contact: '/contact',
   pi: '/pi',
+  credits: '/credits',
 };
 
 // '' at the domain root, '/repo' on a GitHub Pages project site.
@@ -88,6 +90,8 @@ export default function App() {
         return <ContactPage />;
       case 'pi':
         return <PIPage />;
+      case 'credits':
+        return <CreditsPage />;
       default:
         return (
           <>
@@ -113,7 +117,7 @@ export default function App() {
 
       {renderPage()}
 
-      <Footer />
+      <Footer onNavigate={handleNavigate} />
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
