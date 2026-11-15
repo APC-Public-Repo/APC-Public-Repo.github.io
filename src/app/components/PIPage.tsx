@@ -16,12 +16,6 @@ export function PIPage() {
         </h1>
 
         <div className="w-24 h-1 bg-[#2D9CDB] rounded-full mx-auto mt-4"></div>
-
-        <p className="mt-5 text-lg text-gray-600 max-w-3xl mx-auto">
-          Academic background, research record and profile links for the
-          Principal Investigator of the Applied Physics and Chemistry
-          Research Group.
-        </p>
       </div>
 
       {/* Profile */}
@@ -102,10 +96,6 @@ export function PIPage() {
               <h3 className="text-xl font-bold text-[#1E3A5F]">
                 ORCID
               </h3>
-
-              <p className="text-gray-500 mt-1">
-                Official researcher identifier and academic profile.
-              </p>
             </div>
           </a>
 
@@ -126,10 +116,6 @@ export function PIPage() {
               <h3 className="text-xl font-bold text-[#1E3A5F]">
                 Google Scholar
               </h3>
-
-              <p className="text-gray-500 mt-1">
-                Publications, citations and academic impact.
-              </p>
             </div>
           </a>
 
@@ -150,10 +136,6 @@ export function PIPage() {
               <h3 className="text-xl font-bold text-[#1E3A5F]">
                 ResearchGate
               </h3>
-
-              <p className="text-gray-500 mt-1">
-                Research publications, projects and collaborations.
-              </p>
             </div>
           </a>
 
@@ -174,10 +156,6 @@ export function PIPage() {
               <h3 className="text-xl font-bold text-[#1E3A5F]">
                 LinkedIn
               </h3>
-
-              <p className="text-gray-500 mt-1">
-                Professional experience, education and career profile.
-              </p>
             </div>
           </a>
 
