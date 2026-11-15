@@ -5,4 +5,7 @@ export type PageType =
   | "partnership"
   | "contact"
   | "pi"
+  | "people"
+  | "portfolio"
+  | "openings"
   | "credits";

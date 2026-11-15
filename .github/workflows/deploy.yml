@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Picks up Airtable edits without a code change. Airtable automations can
+  # also POST a repository_dispatch with event_type "airtable" to rebuild now.
+  repository_dispatch:
+    types: [airtable]
+  schedule:
+    - cron: '0 * * * *'
 
 permissions:
   contents: read
@@ -30,6 +36,13 @@ jobs:
       - uses: actions/configure-pages@v5
         id: pages
       - run: pnpm install --frozen-lockfile
+      # Rewrites src/content/*.json from Airtable. A failure here leaves the
+      # committed JSON in place, so the deploy still ships the last good copy.
+      - run: node scripts/airtable-sync.mjs
+        continue-on-error: true
+        env:
+          AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
       - run: pnpm build
         env:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}

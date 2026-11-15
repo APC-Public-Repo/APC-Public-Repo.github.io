@@ -10,6 +10,9 @@ import { PublicationsPage } from './components/PublicationsPage';
 import { PartnershipPage } from './components/PartnershipPage';
 import { ContactPage } from './components/ContactPage';
 import { PIPage } from './components/PIPage';
+import { PeoplePage } from './components/PeoplePage';
+import { PortfolioPage } from './components/PortfolioPage';
+import { OpeningsPage } from './components/OpeningsPage';
 import { CreditsPage } from './components/CreditsPage';
 import type { PageType } from './types/navigation';
 
@@ -60,6 +63,21 @@ const PAGES: Record<PageType, PageDef> = {
     path: '/pi',
     title: 'Principal Investigator',
     render: () => <PIPage />,
+  },
+  people: {
+    path: '/people',
+    title: 'People',
+    render: (navigate) => <PeoplePage onNavigate={navigate} />,
+  },
+  portfolio: {
+    path: '/portfolio',
+    title: 'Portfolio',
+    render: () => <PortfolioPage />,
+  },
+  openings: {
+    path: '/openings',
+    title: 'Openings',
+    render: (navigate) => <OpeningsPage onNavigate={navigate} />,
   },
   credits: {
     path: '/credits',

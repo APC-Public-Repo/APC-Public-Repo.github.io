@@ -1,0 +1,42 @@
+[
+  {
+    "id": "rec_dummy_openings_01",
+    "title": "Dummy Opening: Postdoctoral Researcher",
+    "type": "Full-time",
+    "location": "Tangerang Selatan, Indonesia",
+    "deadline": "2026-12-31",
+    "summary": "Placeholder vacancy. Replace the row in Airtable.",
+    "requirements": [
+      "Ph.D. in physics, chemistry or materials science",
+      "Hands-on experience with surface characterisation",
+      "First-author publication record"
+    ],
+    "applyUrl": "https://management.apcresearch.org/career/openings"
+  },
+  {
+    "id": "rec_dummy_openings_02",
+    "title": "Dummy Opening: Research Intern",
+    "type": "Internship",
+    "location": "On-site",
+    "deadline": "2026-09-30",
+    "summary": "Placeholder vacancy. Replace the row in Airtable.",
+    "requirements": [
+      "Final-year undergraduate in a relevant field",
+      "Available on-site for at least three months"
+    ],
+    "applyUrl": "https://management.apcresearch.org/career/openings"
+  },
+  {
+    "id": "rec_dummy_openings_03",
+    "title": "Dummy Opening: Lab Engineer",
+    "type": "Contract",
+    "location": "Tangerang Selatan, Indonesia",
+    "deadline": "",
+    "summary": "Placeholder vacancy. Replace the row in Airtable.",
+    "requirements": [
+      "Bachelor's degree in engineering or physics",
+      "Instrument maintenance experience"
+    ],
+    "applyUrl": "https://management.apcresearch.org/career/openings"
+  }
+]

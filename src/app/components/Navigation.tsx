@@ -2,10 +2,6 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import apcLogo from "../../imports/apc_logo.png";
 import nciLogo from "../../imports/logo-nci-removebg.png";
-import {
-  GITBOOK_PORTFOLIO_URL,
-  GITBOOK_TEAM_URL,
-} from "../config/gitbook";
 import type { PageType } from "../types/navigation";
 
 interface NavigationProps {
@@ -13,18 +9,16 @@ interface NavigationProps {
   currentPage: PageType;
 }
 
-const OPENINGS_URL = "https://management.apcresearch.org/career/openings";
-
 // An item either routes inside the app or links out, never both.
 type NavItem =
   | { label: string; page: PageType }
   | { label: string; href: string };
 
 const navItems: NavItem[] = [
-  { label: "People", href: GITBOOK_TEAM_URL },
+  { label: "People", page: "people" },
   { label: "PI", page: "pi" },
   { label: "Publications", page: "publications" },
-  { label: "Portfolio", href: GITBOOK_PORTFOLIO_URL },
+  { label: "Portfolio", page: "portfolio" },
   { label: "Blog/Substack", href: "https://apcresearch.substack.com" },
   {
     label: "Resources",
@@ -108,12 +102,13 @@ export function Navigation({ onNavigate, currentPage }: NavigationProps) {
             })}
 
             {/* Openings */}
-            <a
-              href={OPENINGS_URL}
+            <button
+              type="button"
+              onClick={() => handleInternalNavigation("openings")}
               className="ml-4 px-7 py-3 rounded-xl bg-[#2D9CDB] text-white font-semibold hover:bg-[#1E3A5F] transition duration-300"
             >
               Openings
-            </a>
+            </button>
 
           </div>
 
@@ -168,13 +163,13 @@ export function Navigation({ onNavigate, currentPage }: NavigationProps) {
             );
           })}
 
-          <a
-            href={OPENINGS_URL}
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="block px-6 py-4 text-[#2D9CDB] font-semibold hover:bg-[#F4FAFF]"
+          <button
+            type="button"
+            onClick={() => handleInternalNavigation("openings")}
+            className="block w-full text-left px-6 py-4 text-[#2D9CDB] font-semibold hover:bg-[#F4FAFF]"
           >
             Openings
-          </a>
+          </button>
 
         </div>
       )}

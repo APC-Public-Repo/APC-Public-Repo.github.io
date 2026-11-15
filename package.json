@@ -6,6 +6,7 @@
   "packageManager": "pnpm@10.34.5",
   "scripts": {
     "build": "vite build",
+    "cms": "node scripts/airtable-sync.mjs",
     "typecheck": "tsc --noEmit",
     "dev": "vite",
     "preview": "vite preview"

@@ -1,0 +1,93 @@
+[
+  {
+    "id": "rec_dummy_people_01",
+    "name": "Arramel, Ph.D.",
+    "role": "Principal Investigator",
+    "group": "PI",
+    "affiliation": "PT. Nanotech Indonesia Global Tbk",
+    "photo": "",
+    "bio": "Leads the Applied Physics and Chemistry Research Group. Surface science, scanning probe microscopy and two-dimensional materials.",
+    "email": "arramel@example.org",
+    "scholar": "https://scholar.google.co.jp/citations?user=WNCf7lIAAAAJ&hl=en",
+    "linkedin": "",
+    "orcid": "https://orcid.org/0000-0003-4125-6099"
+  },
+  {
+    "id": "rec_dummy_people_02",
+    "name": "Dummy Researcher One",
+    "role": "Research Scientist",
+    "group": "Team",
+    "affiliation": "Nano Center Indonesia",
+    "photo": "",
+    "bio": "Placeholder record. Replace the row in Airtable.",
+    "email": "",
+    "scholar": "",
+    "linkedin": "",
+    "orcid": ""
+  },
+  {
+    "id": "rec_dummy_people_03",
+    "name": "Dummy Researcher Two",
+    "role": "Lab Engineer",
+    "group": "Team",
+    "affiliation": "Nano Center Indonesia",
+    "photo": "",
+    "bio": "Placeholder record. Replace the row in Airtable.",
+    "email": "",
+    "scholar": "",
+    "linkedin": "",
+    "orcid": ""
+  },
+  {
+    "id": "rec_dummy_people_04",
+    "name": "Dummy Intern One",
+    "role": "Research Intern",
+    "group": "Intern",
+    "affiliation": "Institut Teknologi Bandung",
+    "photo": "",
+    "bio": "Placeholder record. Replace the row in Airtable.",
+    "email": "",
+    "scholar": "",
+    "linkedin": "",
+    "orcid": ""
+  },
+  {
+    "id": "rec_dummy_people_05",
+    "name": "Dummy Intern Two",
+    "role": "Undergraduate Intern",
+    "group": "Intern",
+    "affiliation": "Universitas Indonesia",
+    "photo": "",
+    "bio": "Placeholder record. Replace the row in Airtable.",
+    "email": "",
+    "scholar": "",
+    "linkedin": "",
+    "orcid": ""
+  },
+  {
+    "id": "rec_dummy_people_06",
+    "name": "Dummy Alumni One",
+    "role": "Former Research Assistant, 2023-2025",
+    "group": "Alumni",
+    "affiliation": "Now at Placeholder University",
+    "photo": "",
+    "bio": "Placeholder record. Replace the row in Airtable.",
+    "email": "",
+    "scholar": "",
+    "linkedin": "",
+    "orcid": ""
+  },
+  {
+    "id": "rec_dummy_people_07",
+    "name": "Dummy Alumni Two",
+    "role": "Former Intern, 2024",
+    "group": "Alumni",
+    "affiliation": "Now at Placeholder Institute",
+    "photo": "",
+    "bio": "Placeholder record. Replace the row in Airtable.",
+    "email": "",
+    "scholar": "",
+    "linkedin": "",
+    "orcid": ""
+  }
+]

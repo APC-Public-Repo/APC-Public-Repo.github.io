@@ -8,7 +8,9 @@ code. Static files only.
 - `pnpm i` install
 - `pnpm dev` dev server
 - `pnpm build` production build into `dist/`
-- `pnpm typecheck` type check (no tests in this repo)
+- `pnpm typecheck` type check
+- `pnpm cms` pull Airtable into `src/content/*.json` (needs the two env vars)
+- `node scripts/airtable-sync.test.mjs` self-check for the Airtable mapping
 
 ## Routing
 
@@ -19,6 +21,34 @@ else needs editing. `pnpm typecheck` fails if the two disagree.
 
 `Navigation.tsx` keeps its own `navItems`. An item has either `page` (routes
 inside the app) or `href` (links out), never both.
+
+## CMS (Airtable)
+
+`/people`, `/portfolio` and `/openings` render from `src/content/*.json`, which
+the pages import directly. `scripts/airtable-sync.mjs` rewrites those files from
+Airtable at build time, so the content is baked into the bundle: no API token
+reaches the browser and no request happens when a visitor loads the page. The
+committed JSON is the fallback, and it currently holds dummy rows.
+
+An Airtable edit goes live on the next build. The workflow builds on push, every
+hour on a schedule, on manual dispatch, and on a `repository_dispatch` with
+`event_type: airtable` (which an Airtable automation can POST).
+
+Secrets live in the repo's Actions secrets: `AIRTABLE_TOKEN` (a personal access
+token with `data.records:read` on the base) and `AIRTABLE_BASE_ID`. Without them
+the script leaves the committed JSON alone and exits 0.
+
+Column names are mapped in the `TABLES` constant of the script, and the row
+shapes are typed in `src/app/types/content.ts`. Renaming a column in Airtable
+means renaming it in both places. Every table also reads two shared columns:
+`Published` (checkbox; an unticked row is skipped) and `Order` (number; sorts
+ascending, blanks last).
+
+| Table | Columns |
+| --- | --- |
+| `People` | Name, Role, Group (`PI`/`Team`/`Intern`/`Alumni`), Affiliation, Photo (attachment), Bio, Email, Scholar, LinkedIn, ORCID |
+| `Portfolio` | Title, Summary, Category, Status, Year, Image (attachment), Link, Tags (multi-select) |
+| `Openings` | Title, Type, Location, Deadline, Summary, Requirements (long text, one per line), Apply URL |
 
 ## State
 
@@ -37,7 +67,8 @@ Async work uses one explicit status value, never a pair of booleans:
 ## Deploy
 
 Push to `main`. `.github/workflows/deploy.yml` builds and publishes to GitHub
-Pages, serving `apcresearch.org` (see `CNAME`).
+Pages, serving `apcresearch.org` (see `CNAME`). `vercel.json` is left over from
+a Vercel setup and does not affect the live site.
 
 ## Notes
 
