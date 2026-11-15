@@ -111,8 +111,9 @@ async function fetchRecords(table) {
 
 export function toRows(records, fields) {
   return records
-    // Unticked rows are drafts. A table with no Published column publishes all.
-    .filter((record) => record.fields.Published !== false)
+    // Airtable omits an unticked checkbox from the API response, so a row
+    // counts as published only when Published comes back as true.
+    .filter((record) => record.fields.Published === true)
     .sort(
       (a, b) => (a.fields.Order ?? Infinity) - (b.fields.Order ?? Infinity),
     )

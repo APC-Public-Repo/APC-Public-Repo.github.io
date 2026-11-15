@@ -34,6 +34,9 @@ An Airtable edit goes live on the next build. The workflow builds on push, every
 hour on a schedule, on manual dispatch, and on a `repository_dispatch` with
 `event_type: airtable` (which an Airtable automation can POST).
 
+The live base is `APC Website CMS` (`app0uHCWdoNYmSmlX`) in the `APC Content
+Management System` workspace, seeded with placeholder rows.
+
 Secrets live in the repo's Actions secrets: `AIRTABLE_TOKEN` (a personal access
 token with `data.records:read` on the base) and `AIRTABLE_BASE_ID`. Without them
 the script leaves the committed JSON alone and exits 0.
@@ -41,7 +44,8 @@ the script leaves the committed JSON alone and exits 0.
 Column names are mapped in the `TABLES` constant of the script, and the row
 shapes are typed in `src/app/types/content.ts`. Renaming a column in Airtable
 means renaming it in both places. Every table also reads two shared columns:
-`Published` (checkbox; an unticked row is skipped) and `Order` (number; sorts
+`Published` (checkbox; a row publishes only when it is ticked, because Airtable
+leaves an unticked checkbox out of its API response) and `Order` (number; sorts
 ascending, blanks last).
 
 | Table | Columns |

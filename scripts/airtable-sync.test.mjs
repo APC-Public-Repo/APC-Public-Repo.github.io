@@ -14,10 +14,12 @@ const fields = { title: ['Title'], tags: ['Tags', 'list'] };
 
 const rows = toRows(
   [
-    { id: 'r2', fields: { Title: 'Second', Order: 2, Tags: ['x'] } },
-    { id: 'r0', fields: { Title: 'Draft', Order: 0, Published: false } },
-    { id: 'r1', fields: { Title: 'First', Order: 1 } },
-    { id: 'r9', fields: { Title: 'No order' } },
+    { id: 'r2', fields: { Title: 'Second', Order: 2, Tags: ['x'], Published: true } },
+    { id: 'r0', fields: { Title: 'Explicit draft', Order: 0, Published: false } },
+    // Airtable leaves an unticked checkbox out of the payload entirely.
+    { id: 'r8', fields: { Title: 'Implicit draft', Order: 8 } },
+    { id: 'r1', fields: { Title: 'First', Order: 1, Published: true } },
+    { id: 'r9', fields: { Title: 'No order', Published: true } },
   ],
   fields,
 );
