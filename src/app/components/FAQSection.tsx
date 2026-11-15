@@ -21,7 +21,7 @@ export function FAQSection() {
             Frequently Asked Questions
           </h2>
           <p className="text-xl text-gray-600">
-            Everything you need to know about APC Research
+            Joining the group and thesis supervision
           </p>
         </div>
 

@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Navigation } from './components/Navigation';
 import { HeroSection } from './components/HeroSection';
 import { WhatsNewSection } from './components/WhatsNewSection';
-import { ResearchSubteams } from './components/ResearchSubteams';
 import { DailyReadings } from './components/DailyReadings';
 import { FAQSection } from './components/FAQSection';
 import { Footer } from './components/Footer';
-import { AuthModal, type AuthUser } from './components/AuthModal';
 import { NewsPage } from './components/NewsPage';
 import { PublicationsPage } from './components/PublicationsPage';
 import { PartnershipPage } from './components/PartnershipPage';
@@ -15,53 +13,85 @@ import { PIPage } from './components/PIPage';
 import { CreditsPage } from './components/CreditsPage';
 import type { PageType } from './types/navigation';
 
-const pagePaths: Record<PageType, string> = {
-  home: '/',
-  publications: '/publications',
-  news: '/news',
-  partnership: '/partnership',
-  contact: '/contact',
-  pi: '/pi',
-  credits: '/credits',
+type Navigate = (page: PageType) => void;
+
+interface PageDef {
+  path: string;
+  title: string;
+  render: (navigate: Navigate) => ReactNode;
+}
+
+// The whole router. To add a page: add it to PageType, then add one entry here.
+// URL, document title and content stay in the same place on purpose.
+const PAGES: Record<PageType, PageDef> = {
+  home: {
+    path: '/',
+    title: 'Home',
+    render: (navigate) => (
+      <>
+        <HeroSection onNavigate={navigate} />
+        <WhatsNewSection onNavigate={navigate} />
+        <DailyReadings />
+        <FAQSection />
+      </>
+    ),
+  },
+  publications: {
+    path: '/publications',
+    title: 'Publications',
+    render: () => <PublicationsPage />,
+  },
+  news: {
+    path: '/news',
+    title: 'News',
+    render: () => <NewsPage />,
+  },
+  partnership: {
+    path: '/partnership',
+    title: 'Partnership',
+    render: () => <PartnershipPage />,
+  },
+  contact: {
+    path: '/contact',
+    title: 'Contact',
+    render: () => <ContactPage />,
+  },
+  pi: {
+    path: '/pi',
+    title: 'Principal Investigator',
+    render: () => <PIPage />,
+  },
+  credits: {
+    path: '/credits',
+    title: 'Credits',
+    render: () => <CreditsPage />,
+  },
 };
 
 const siteName = 'Applied Physics & Chemistry, Nano Center Indonesia';
 
-const pageTitles: Record<PageType, string> = {
-  home: 'Home',
-  publications: 'Publications',
-  news: 'News',
-  partnership: 'Partnership',
-  contact: 'Contact',
-  pi: 'Principal Investigator',
-  credits: 'Credits',
-};
-
 // '' at the domain root, '/repo' on a GitHub Pages project site.
 const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
-const urlFor = (page: PageType) => basePath + pagePaths[page];
+const urlFor = (page: PageType) => basePath + PAGES[page].path;
 
 function getPageFromPath(pathname: string): PageType {
   const path =
     (pathname.startsWith(basePath) ? pathname.slice(basePath.length) : pathname)
       .replace(/\/+$/, '') || '/';
-  const entry = (Object.entries(pagePaths) as [PageType, string][]).find(
-    ([, p]) => p === path,
+  const match = (Object.keys(PAGES) as PageType[]).find(
+    (page) => PAGES[page].path === path,
   );
-  return entry ? entry[0] : 'home';
+  return match ?? 'home';
 }
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageType>(() =>
     getPageFromPath(window.location.pathname),
   );
-  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    // Unknown path (or /index.html) falls back to home – keep URL honest.
+    // Unknown path (or /index.html) falls back to home, so correct the URL.
     window.history.replaceState(null, '', urlFor(currentPage));
 
     const handlePopState = () => {
@@ -73,72 +103,28 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    document.title = `${pageTitles[currentPage]} | ${siteName}`;
+    document.title = `${PAGES[currentPage].title} | ${siteName}`;
   }, [currentPage]);
 
-  const handleNavigate = (page: PageType) => {
-    if (page !== currentPage) {
+  const navigate: Navigate = (page) => {
+    const samePage = page === currentPage;
+
+    if (!samePage) {
       window.history.pushState(null, '', urlFor(page));
       setCurrentPage(page);
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleLogin = (user: AuthUser) => {
-    setCurrentUser(user);
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-  };
-
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'publications':
-        return <PublicationsPage />;
-      case 'news':
-        return <NewsPage />;
-      case 'partnership':
-        return <PartnershipPage />;
-      case 'contact':
-        return <ContactPage />;
-      case 'pi':
-        return <PIPage />;
-      case 'credits':
-        return <CreditsPage />;
-      default:
-        return (
-          <>
-            <HeroSection onNavigate={handleNavigate} />
-            <WhatsNewSection onNavigate={handleNavigate} />
-            <ResearchSubteams />
-            <DailyReadings />
-            <FAQSection />
-          </>
-        );
-    }
+    // A new page opens at the top at once. Smooth scrolling is for staying put.
+    window.scrollTo({ top: 0, behavior: samePage ? 'smooth' : 'auto' });
   };
 
   return (
     <div className="min-h-screen bg-white">
-      <Navigation
-        onNavigate={handleNavigate}
-        currentPage={currentPage}
-        currentUser={currentUser}
-        onLoginClick={() => setIsAuthModalOpen(true)}
-        onLogout={handleLogout}
-      />
+      <Navigation onNavigate={navigate} currentPage={currentPage} />
 
-      {renderPage()}
+      {PAGES[currentPage].render(navigate)}
 
-      <Footer onNavigate={handleNavigate} />
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onLogin={handleLogin}
-      />
+      <Footer onNavigate={navigate} />
     </div>
   );
 }

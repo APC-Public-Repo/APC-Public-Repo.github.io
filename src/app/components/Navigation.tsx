@@ -7,44 +7,32 @@ import {
   GITBOOK_TEAM_URL,
 } from "../config/gitbook";
 import type { PageType } from "../types/navigation";
-import type { AuthUser } from "./AuthModal";
 
 interface NavigationProps {
   onNavigate: (page: PageType) => void;
   currentPage: PageType;
-  currentUser: AuthUser | null;
-  onLoginClick: () => void;
-  onLogout: () => void;
 }
 
 const OPENINGS_URL = "https://management.apcresearch.org/career/openings";
 
-interface NavItem {
-  label: string;
-  page?: PageType;
-  href?: string;
-}
+// An item either routes inside the app or links out, never both.
+type NavItem =
+  | { label: string; page: PageType }
+  | { label: string; href: string };
 
 const navItems: NavItem[] = [
   { label: "People", href: GITBOOK_TEAM_URL },
   { label: "PI", page: "pi" },
   { label: "Publications", page: "publications" },
   { label: "Portfolio", href: GITBOOK_PORTFOLIO_URL },
-  {
-    label: "Blog/Substack",
-    page: "news",
-    href: "https://apcresearch.substack.com",
-  },
+  { label: "Blog/Substack", href: "https://apcresearch.substack.com" },
   {
     label: "Resources",
     href: "https://management.apcresearch.org/resources/h",
   },
 ];
 
-export function Navigation({
-  onNavigate,
-  currentPage,
-}: NavigationProps) {
+export function Navigation({ onNavigate, currentPage }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleInternalNavigation = (page: PageType) => {
@@ -53,7 +41,7 @@ export function Navigation({
   };
 
   const isActive = (item: NavItem) =>
-    item.page !== undefined && currentPage === item.page;
+    "page" in item && currentPage === item.page;
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
@@ -93,7 +81,7 @@ export function Navigation({
                   : "text-[#1E3A5F] hover:text-[#2D9CDB]"
               }`;
 
-              if (item.href) {
+              if ("href" in item) {
                 return (
                   <a key={item.label} href={item.href} className={className}>
                     {item.label}
@@ -108,7 +96,7 @@ export function Navigation({
                 <button
                   key={item.label}
                   type="button"
-                  onClick={() => handleInternalNavigation(item.page!)}
+                  onClick={() => handleInternalNavigation(item.page)}
                   className={className}
                 >
                   {item.label}
@@ -155,7 +143,7 @@ export function Navigation({
                 : "text-[#1E3A5F] hover:bg-[#F4FAFF]"
             }`;
 
-            if (item.href) {
+            if ("href" in item) {
               return (
                 <a
                   key={item.label}
@@ -172,7 +160,7 @@ export function Navigation({
               <button
                 key={item.label}
                 type="button"
-                onClick={() => handleInternalNavigation(item.page!)}
+                onClick={() => handleInternalNavigation(item.page)}
                 className={className}
               >
                 {item.label}

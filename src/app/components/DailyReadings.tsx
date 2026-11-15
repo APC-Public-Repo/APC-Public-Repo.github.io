@@ -60,8 +60,7 @@ export function DailyReadings() {
           </div>
 
           <p className="text-xl text-gray-600">
-            Curated resources for the latest in nanotechnology and scientific
-            research
+            Nanotechnology and science news the group reads daily
           </p>
         </div>
 

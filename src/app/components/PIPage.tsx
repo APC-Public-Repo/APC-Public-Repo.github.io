@@ -18,9 +18,9 @@ export function PIPage() {
         <div className="w-24 h-1 bg-[#2D9CDB] rounded-full mx-auto mt-4"></div>
 
         <p className="mt-5 text-lg text-gray-600 max-w-3xl mx-auto">
-          Meet the Principal Investigator leading the Applied Physics and
-          Chemistry Research Group and learn more about his academic
-          background, research journey, and professional portfolio.
+          Academic background, research record and profile links for the
+          Principal Investigator of the Applied Physics and Chemistry
+          Research Group.
         </p>
       </div>
 

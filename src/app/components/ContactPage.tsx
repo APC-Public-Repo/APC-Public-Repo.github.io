@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, CheckCircle, Linkedin, Instagram } from 'lucide-react';
 import bannerImg from '../../imports/Background_design__3_-1.png';
 
+const CONTACT_EMAIL = 'apc.nanocenter@gmail.com';
+
+// Keeps the mailto URL inside the length mail clients accept.
+const MESSAGE_LIMIT = 1200;
+
 const inquiryTypes = [
   'General Inquiry',
   'Research Collaboration',
@@ -12,18 +17,31 @@ const inquiryTypes = [
   'Other',
 ];
 
-export function ContactPage() {
-  const [form, setForm] = useState({ name: '', email: '', institution: '', type: '', message: '' });
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+const emptyForm = { name: '', email: '', institution: '', type: '', message: '' };
 
+export function ContactPage() {
+  const [form, setForm] = useState(emptyForm);
+  const [status, setStatus] = useState<'editing' | 'handedOff'>('editing');
+
+  // This site has no backend, so the visitor mail client sends the message.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 1200);
+
+    const body = [
+      'Name: ' + form.name,
+      'Email: ' + form.email,
+      'Institution: ' + (form.institution || '-'),
+      'Inquiry type: ' + form.type,
+      '',
+      form.message,
+    ].join('\n');
+
+    const subject = encodeURIComponent('[Website] ' + form.type);
+
+    window.location.href =
+      'mailto:' + CONTACT_EMAIL + '?subject=' + subject + '&body=' + encodeURIComponent(body);
+
+    setStatus('handedOff');
   };
 
   return (
@@ -38,7 +56,7 @@ export function ContactPage() {
           <p className="text-[#2D9CDB] font-semibold tracking-widest text-sm uppercase mb-3">Get in Touch</p>
           <h1 className="text-white mb-4">Contact APC Research</h1>
           <p className="text-blue-200 max-w-2xl mx-auto leading-relaxed">
-            Whether you're interested in collaboration, joining our team, or just want to learn more — we'd love to hear from you.
+            Collaborations, lab visits and student applications all start here.
           </p>
         </div>
       </div>
@@ -56,7 +74,7 @@ export function ContactPage() {
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Email</p>
-                    <a href="mailto:apc.nanocenter@gmail.com" className="text-[#1E3A5F] font-medium text-sm hover:text-[#2D9CDB] transition-colors">apc.nanocenter@gmail.com</a>
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="text-[#1E3A5F] font-medium text-sm hover:text-[#2D9CDB] transition-colors">{CONTACT_EMAIL}</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -88,12 +106,12 @@ export function ContactPage() {
               <h3 className="text-[#1E3A5F] font-bold mb-4">Office Hours</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Monday – Friday</span>
-                  <span className="text-[#1E3A5F] font-medium">08:00 – 17:00 WIB</span>
+                  <span className="text-gray-500">Monday to Friday</span>
+                  <span className="text-[#1E3A5F] font-medium">08:00 to 17:00 WIB</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Saturday</span>
-                  <span className="text-[#1E3A5F] font-medium">09:00 – 13:00 WIB</span>
+                  <span className="text-[#1E3A5F] font-medium">09:00 to 13:00 WIB</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Sunday</span>
@@ -106,12 +124,14 @@ export function ContactPage() {
               <h3 className="text-[#1E3A5F] font-bold mb-4">Follow Us</h3>
               <div className="flex gap-3">
                 {[
-                  { icon: Linkedin, label: 'LinkedIn', href: '#' },
-                  { icon: Instagram, label: 'Instagram', href: '#' },
+                  { icon: Linkedin, label: 'LinkedIn', href: 'https://www.linkedin.com/company/nano-center-indonesia' },
+                  { icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/apc.nanocenter/' },
                 ].map(({ icon: Icon, label, href }) => (
                   <a
                     key={label}
                     href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 bg-[#F0F6FF] text-[#1E3A5F] rounded-lg text-sm font-medium hover:bg-[#2D9CDB] hover:text-white transition-colors"
                   >
                     <Icon size={15} />
@@ -125,20 +145,27 @@ export function ContactPage() {
           {/* Contact Form */}
           <div className="lg:col-span-3">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-              {submitted ? (
+              {status === 'handedOff' ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-4">
                     <CheckCircle size={32} className="text-green-500" />
                   </div>
-                  <h3 className="text-[#1E3A5F] font-bold text-xl mb-2">Message Sent!</h3>
+                  <h3 className="text-[#1E3A5F] font-bold text-xl mb-2">Your draft is ready</h3>
                   <p className="text-gray-600 max-w-sm">
-                    Thanks for reaching out. We'll get back to you within 2–3 business days.
+                    Your mail app just opened with this message addressed to{' '}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="text-[#2D9CDB] hover:underline">{CONTACT_EMAIL}</a>.
+                    Press send there and we reply within 2 to 3 business days.
+                  </p>
+                  <p className="text-gray-500 text-sm mt-3 max-w-sm">
+                    Nothing opened? Write to{' '}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="text-[#2D9CDB] hover:underline">{CONTACT_EMAIL}</a>{' '}
+                    directly.
                   </p>
                   <button
-                    onClick={() => { setSubmitted(false); setForm({ name: '', email: '', institution: '', type: '', message: '' }); }}
+                    onClick={() => { setStatus('editing'); setForm(emptyForm); }}
                     className="mt-6 px-6 py-2.5 bg-[#2D9CDB] text-white rounded-full text-sm font-semibold hover:bg-[#1E3A5F] transition-colors"
                   >
-                    Send Another Message
+                    Write Another Message
                   </button>
                 </div>
               ) : (
@@ -154,6 +181,7 @@ export function ContactPage() {
                           value={form.name}
                           onChange={(e) => setForm({ ...form, name: e.target.value })}
                           placeholder="Your name"
+                          autoComplete="name"
                           className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-[#1E3A5F] placeholder-gray-400 focus:outline-none focus:border-[#2D9CDB] focus:ring-1 focus:ring-[#2D9CDB] transition"
                         />
                       </div>
@@ -165,6 +193,7 @@ export function ContactPage() {
                           value={form.email}
                           onChange={(e) => setForm({ ...form, email: e.target.value })}
                           placeholder="you@example.com"
+                          autoComplete="email"
                           className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-[#1E3A5F] placeholder-gray-400 focus:outline-none focus:border-[#2D9CDB] focus:ring-1 focus:ring-[#2D9CDB] transition"
                         />
                       </div>
@@ -177,6 +206,7 @@ export function ContactPage() {
                         value={form.institution}
                         onChange={(e) => setForm({ ...form, institution: e.target.value })}
                         placeholder="Your university or company"
+                        autoComplete="organization"
                         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-[#1E3A5F] placeholder-gray-400 focus:outline-none focus:border-[#2D9CDB] focus:ring-1 focus:ring-[#2D9CDB] transition"
                       />
                     </div>
@@ -189,7 +219,7 @@ export function ContactPage() {
                         onChange={(e) => setForm({ ...form, type: e.target.value })}
                         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-[#1E3A5F] focus:outline-none focus:border-[#2D9CDB] focus:ring-1 focus:ring-[#2D9CDB] transition bg-white"
                       >
-                        <option value="">Select a topic...</option>
+                        <option value="">Select a topic</option>
                         {inquiryTypes.map((t) => (
                           <option key={t} value={t}>{t}</option>
                         ))}
@@ -201,32 +231,27 @@ export function ContactPage() {
                       <textarea
                         required
                         rows={5}
+                        maxLength={MESSAGE_LIMIT}
                         value={form.message}
                         onChange={(e) => setForm({ ...form, message: e.target.value })}
-                        placeholder="Tell us about your inquiry, research interests, or how we can help..."
+                        placeholder="What would you like to discuss?"
                         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-[#1E3A5F] placeholder-gray-400 focus:outline-none focus:border-[#2D9CDB] focus:ring-1 focus:ring-[#2D9CDB] transition resize-none"
                       />
+                      <p className="mt-1.5 text-xs text-gray-400 text-right">
+                        {form.message.length} / {MESSAGE_LIMIT}
+                      </p>
                     </div>
 
                     <button
                       type="submit"
-                      disabled={loading}
-                      className="flex items-center justify-center gap-2 w-full py-3 bg-[#1E3A5F] text-white rounded-full font-semibold hover:bg-[#2D9CDB] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-[#1E3A5F] text-white rounded-full font-semibold hover:bg-[#2D9CDB] transition-colors"
                     >
-                      {loading ? (
-                        <span className="flex items-center gap-2">
-                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                          </svg>
-                          Sending...
-                        </span>
-                      ) : (
-                        <>
-                          Send Message <Send size={15} />
-                        </>
-                      )}
+                      Open in Mail App <Send size={15} />
                     </button>
+
+                    <p className="text-xs text-gray-400 text-center">
+                      This opens a prefilled draft in your own mail app.
+                    </p>
                   </form>
                 </>
               )}
@@ -234,7 +259,7 @@ export function ContactPage() {
           </div>
         </div>
 
-        {/* Map placeholder */}
+        {/* Map */}
         <div className="mt-10 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="bg-[#F0F6FF] h-56 flex items-center justify-center">
             <div className="text-center">

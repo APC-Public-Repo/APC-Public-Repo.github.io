@@ -3,38 +3,19 @@ import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
-
-function figmaAssetResolver() {
-  return {
-    name: 'figma-asset-resolver',
-    resolveId(id: string)  {
-      if (id.startsWith('figma:asset/')) {
-        const filename = id.replace('figma:asset/', '')
-        return path.resolve(__dirname, 'src/assets', filename)
-      }
-    },
-  }
-}
-
 export default defineConfig({
   // GitHub Pages project sites serve from /<repo>/. The workflow passes
   // BASE_PATH from actions/configure-pages (empty for custom domains).
   base: (process.env.BASE_PATH || '/').replace(/\/*$/, '/'),
 
-  plugins: [
-    figmaAssetResolver(),
-    // The React and Tailwind plugins are both required for Make, even if
-    // Tailwind is not being actively used – do not remove them
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [react(), tailwindcss()],
+
   resolve: {
     alias: {
-      // Alias @ to the src directory
       '@': path.resolve(__dirname, './src'),
     },
   },
 
-  // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
+  // Extra extensions treated as static assets. Never list .css, .ts or .tsx.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 })

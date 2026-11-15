@@ -6,6 +6,7 @@
   "packageManager": "pnpm@10.34.5",
   "scripts": {
     "build": "vite build",
+    "typecheck": "tsc --noEmit",
     "dev": "vite",
     "preview": "vite preview"
   },
@@ -75,6 +76,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "4.7.0",
     "tailwindcss": "4.1.12",
+    "typescript": "^7.0.2",
     "vite": "6.3.5"
   }
 }

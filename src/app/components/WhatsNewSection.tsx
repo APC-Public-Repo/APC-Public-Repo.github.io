@@ -15,73 +15,81 @@ interface Post {
   link: string;
 }
 
+type FeedState =
+  | { status: "loading" }
+  | { status: "ready"; posts: Post[] }
+  | { status: "error" };
+
+const FEED_URL =
+  "https://api.rss2json.com/v1/api.json?rss_url=https://apcresearch.substack.com/feed";
+
+const BLOG_URL = "https://apcresearch.substack.com";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800";
+
+// Feed titles arrive HTML-escaped, so "&amp;" has to become "&" before render.
+const decodeEntities = (text: string) =>
+  new DOMParser().parseFromString(text, "text/html").documentElement
+    .textContent ?? text;
+
+function toPost(item: any, index: number): Post {
+  const html = item.content || item.description || "";
+  const imageMatch = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+
+  return {
+    id: index,
+    title: decodeEntities(item.title ?? ""),
+    date: new Date(item.pubDate).toLocaleDateString(),
+    description:
+      decodeEntities(html.replace(/<[^>]+>/g, ""))
+        .replace(/\s+/g, " ")
+        .substring(0, 170) + "...",
+    image: imageMatch?.[1] || item.thumbnail || FALLBACK_IMAGE,
+    link: item.link,
+  };
+}
+
 export function WhatsNewSection({
   onNavigate,
 }: WhatsNewSectionProps) {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [feed, setFeed] = useState<FeedState>({ status: "loading" });
 
   useEffect(() => {
+    let active = true;
+
     async function loadPosts() {
       try {
-        const response = await fetch(
-          "https://api.rss2json.com/v1/api.json?rss_url=https://apcresearch.substack.com/feed"
-        );
+        const response = await fetch(FEED_URL);
+
+        if (!response.ok) {
+          throw new Error(`feed responded ${response.status}`);
+        }
 
         const data = await response.json();
+        const items = Array.isArray(data.items) ? data.items : [];
 
-        console.log(data.items[0]); // Leave this for now
+        if (items.length === 0) {
+          throw new Error("feed returned no items");
+        }
 
-        const latest = data.items
-          .slice(0, 3)
-          .map((item: any, index: number) => {
-            const html = item.content || item.description || "";
-
-            const imageMatch = html.match(
-              /<img[^>]+src=["']([^"']+)["']/i
-            );
-
-            const image =
-              imageMatch?.[1] ||
-              item.thumbnail ||
-              "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800";
-
-            return {
-              id: index,
-              title: item.title,
-              date: new Date(item.pubDate).toLocaleDateString(),
-
-              description: html
-                .replace(/<[^>]+>/g, "")
-                .replace(/\s+/g, " ")
-                .substring(0, 170) + "...",
-
-              image,
-
-              link: item.link,
-            };
+        if (active) {
+          setFeed({
+            status: "ready",
+            posts: items.slice(0, 3).map(toPost),
           });
-
-        setPosts(latest);
-      } catch (err) {
-        console.error(err);
+        }
+      } catch (error) {
+        console.error("Substack feed unavailable:", error);
+        if (active) setFeed({ status: "error" });
       }
-
-      setLoading(false);
     }
 
     loadPosts();
+    return () => {
+      active = false;
+    };
   }, []);
-
-  if (loading) {
-    return (
-      <section id="research" className="py-20 bg-white">
-        <div className="text-center text-gray-500">
-          Loading latest research...
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section id="research" className="py-20 bg-white">
@@ -97,80 +105,123 @@ export function WhatsNewSection({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        {feed.status === "loading" && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            {[0, 1, 2].map((slot) => (
+              <div
+                key={slot}
+                className="bg-white border-t-4 border-[#de1f1f] rounded-lg shadow-md overflow-hidden"
+              >
+                <div className="h-48 bg-gray-100 animate-pulse" />
+                <div className="p-6 space-y-3">
+                  <div className="h-5 w-24 bg-gray-100 rounded-full animate-pulse" />
+                  <div className="h-6 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-4 w-1/3 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-16 bg-gray-100 rounded animate-pulse" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
-          {posts.map((post) => (
+        {feed.status === "error" && (
+          <div className="mb-12 max-w-xl mx-auto text-center bg-[#F0F6FF] border border-[#2D9CDB]/20 rounded-xl p-8">
+            <p className="text-[#1E3A5F] font-semibold mb-2">
+              The post feed is not reachable right now.
+            </p>
 
-            <div
-              key={post.id}
-              onClick={() => window.open(post.link, "_blank")}
-              className="group bg-white border-t-4 border-[#de1f1f] rounded-lg shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 cursor-pointer"
+            <p className="text-gray-600 text-sm mb-5">
+              Our writing lives on Substack and stays available there.
+            </p>
+
+            <a
+              href={BLOG_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#2D9CDB] text-white rounded-full text-sm font-semibold hover:bg-[#1E3A5F] transition-colors"
             >
+              Read on Substack
+              <ArrowRight size={16} />
+            </a>
+          </div>
+        )}
 
-              <div className="relative h-48 overflow-hidden">
+        {feed.status === "ready" && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
 
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
+            {feed.posts.map((post) => (
 
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1E3A5F]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <div
+                key={post.id}
+                onClick={() => window.open(post.link, "_blank")}
+                className="group bg-white border-t-4 border-[#de1f1f] rounded-lg shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 cursor-pointer"
+              >
 
-                  <div className="bg-white/90 px-4 py-2 rounded-full flex items-center gap-2 shadow">
+                <div className="relative h-48 overflow-hidden">
 
-                    <BookOpen
-                      size={14}
-                      className="text-[#2D9CDB]"
-                    />
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
 
-                    <span className="text-xs font-bold text-[#1E3A5F]">
-                      Read Article
-                    </span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1E3A5F]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+
+                    <div className="bg-white/90 px-4 py-2 rounded-full flex items-center gap-2 shadow">
+
+                      <BookOpen
+                        size={14}
+                        className="text-[#2D9CDB]"
+                      />
+
+                      <span className="text-xs font-bold text-[#1E3A5F]">
+                        Read Article
+                      </span>
+
+                    </div>
 
                   </div>
 
                 </div>
 
-              </div>
+                <div className="p-6">
 
-              <div className="p-6">
+                  <div className="inline-block mb-3 px-3 py-1 bg-[#F0F6FF] text-[#2D9CDB] rounded-full text-xs font-medium">
+                    Substack
+                  </div>
 
-                <div className="inline-block mb-3 px-3 py-1 bg-[#F0F6FF] text-[#2D9CDB] rounded-full text-xs font-medium">
-                  Substack
+                  <h3 className="text-xl font-bold text-[#1E3A5F] mb-3 group-hover:text-[#2D9CDB] transition-colors">
+                    {post.title}
+                  </h3>
+
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                    <Calendar size={14} />
+                    {post.date}
+                  </div>
+
+                  <p className="text-gray-600 text-sm line-clamp-4 mb-6">
+                    {post.description}
+                  </p>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(post.link, "_blank");
+                    }}
+                    className="inline-flex items-center gap-2 text-[#2D9CDB] hover:text-[#1E3A5F] font-medium"
+                  >
+                    Read Article
+                    <ArrowRight size={16} />
+                  </button>
+
                 </div>
 
-                <h3 className="text-xl font-bold text-[#1E3A5F] mb-3 group-hover:text-[#2D9CDB] transition-colors">
-                  {post.title}
-                </h3>
-
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                  <Calendar size={14} />
-                  {post.date}
-                </div>
-
-                <p className="text-gray-600 text-sm line-clamp-4 mb-6">
-                  {post.description}
-                </p>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.open(post.link, "_blank");
-                  }}
-                  className="inline-flex items-center gap-2 text-[#2D9CDB] hover:text-[#1E3A5F] font-medium"
-                >
-                  Read Article
-                  <ArrowRight size={16} />
-                </button>
-
               </div>
 
-            </div>
+            ))}
 
-          ))}
-
-        </div>
+          </div>
+        )}
 
         <div className="text-center">
 
