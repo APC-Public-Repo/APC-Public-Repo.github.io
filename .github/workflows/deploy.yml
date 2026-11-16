@@ -38,7 +38,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Rewrites src/content/*.json from Airtable. A failure here leaves the
       # committed JSON in place, so the deploy still ships the last good copy.
+      # The last step of the job then turns it red, because a green run that
+      # quietly served stale content is how an Airtable edit goes missing.
       - run: node scripts/airtable-sync.mjs
+        id: cms
         continue-on-error: true
         env:
           AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
@@ -53,3 +56,8 @@ jobs:
           path: dist
       - uses: actions/deploy-pages@v4
         id: deployment
+      # Runs after the deploy on purpose: the site stays up, the run goes red.
+      - if: steps.cms.outcome == 'failure'
+        run: |
+          echo "::error::Airtable sync failed, so this deploy shipped the committed src/content/*.json. See the \"Run node scripts/airtable-sync.mjs\" step."
+          exit 1

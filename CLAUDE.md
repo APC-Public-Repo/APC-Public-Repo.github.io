@@ -42,7 +42,10 @@ Management System` workspace, seeded with placeholder rows.
 
 Secrets live in the repo's Actions secrets: `AIRTABLE_TOKEN` (a personal access
 token with `data.records:read` on the base) and `AIRTABLE_BASE_ID`. Without them
-the script leaves the committed JSON alone and exits 0.
+the script leaves the committed JSON alone; it exits 0 locally and 1 when `CI`
+is set, so a deploy that silently shipped the placeholder rows cannot pass as
+green. The sync step keeps `continue-on-error`, so a failure still ships the
+last good JSON, and the workflow's last step turns the run red afterwards.
 
 Column names are mapped in the `TABLES` constant of the script, and the row
 shapes are typed in `src/app/types/content.ts`. Renaming a column in Airtable

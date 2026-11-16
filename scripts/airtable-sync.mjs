@@ -9,7 +9,9 @@
 //
 // Needs AIRTABLE_TOKEN (personal access token, data.records:read on the base)
 // and AIRTABLE_BASE_ID. Without them the script leaves the committed JSON
-// alone, so local dev and a build with no secrets both still work.
+// alone, so local dev and a build with no secrets both still work. On CI it
+// also exits 1, because there a missing secret means the deploy just shipped
+// stale placeholder content to visitors.
 //
 // Run it with: node scripts/airtable-sync.mjs
 
@@ -214,9 +216,24 @@ async function fetchRecords(table) {
 // Only run when invoked directly. The self-check imports the helpers above.
 if (process.argv[1]?.endsWith('airtable-sync.mjs')) {
   if (!TOKEN || !BASE_ID) {
-    console.log(
-      'AIRTABLE_TOKEN or AIRTABLE_BASE_ID missing. Keeping the committed src/content/*.json.',
-    );
+    const missing = [
+      !TOKEN && 'AIRTABLE_TOKEN',
+      !BASE_ID && 'AIRTABLE_BASE_ID',
+    ]
+      .filter(Boolean)
+      .join(' and ');
+
+    // Locally that is normal: dev and a contributor's build both run without
+    // secrets and want the committed JSON. On CI it means the live site is
+    // serving stale content, so say so loudly instead of exiting green.
+    if (process.env.CI) {
+      console.error(
+        `${missing} missing. Set the repository Actions secrets; the build is shipping the committed src/content/*.json.`,
+      );
+      process.exit(1);
+    }
+
+    console.log(`${missing} missing. Keeping the committed src/content/*.json.`);
     process.exit(0);
   }
 
