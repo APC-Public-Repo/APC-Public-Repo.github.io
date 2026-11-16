@@ -20,10 +20,6 @@ const navItems: NavItem[] = [
   { label: "Publications", page: "publications" },
   { label: "Portfolio", page: "portfolio" },
   { label: "Blog/Substack", href: "https://apcresearch.substack.com" },
-  {
-    label: "Resources",
-    href: "https://management.apcresearch.org/resources/h",
-  },
 ];
 
 export function Navigation({ onNavigate, currentPage }: NavigationProps) {
