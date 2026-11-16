@@ -1,6 +1,9 @@
 // Shapes of src/content/*.json. scripts/airtable-sync.mjs writes those files
 // from Airtable at build time, so these types are the contract between the
 // Airtable columns listed in that script and the pages that render them.
+//
+// Image and file paths are relative to the site root (for example
+// "cms/att123.jpg"), so render them through assetUrl() in content.ts.
 
 export type PersonGroup = 'PI' | 'Team' | 'Intern' | 'Alumni';
 
@@ -18,16 +21,20 @@ export interface Person {
   orcid: string;
 }
 
-export interface PortfolioItem {
+// Field names follow the DJKI patent register.
+export interface Patent {
   id: string;
   title: string;
-  summary: string;
-  category: string;
+  applicationNumber: string;
+  patentNumber: string;
+  filingDate: string;
+  publicationDate: string;
+  inventors: string[];
+  holder: string;
+  type: string;
   status: string;
-  year: string;
-  image: string;
-  link: string;
-  tags: string[];
+  ipc: string;
+  abstract: string;
 }
 
 export interface Opening {
@@ -39,4 +46,21 @@ export interface Opening {
   summary: string;
   requirements: string[];
   applyUrl: string;
+}
+
+export interface Attachment {
+  name: string;
+  path: string;
+}
+
+export interface ResearchInterest {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  body: string;
+  headline: string;
+  attachments: Attachment[];
+  lead: string;
+  members: string[];
 }

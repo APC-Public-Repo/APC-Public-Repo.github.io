@@ -7,5 +7,6 @@ export type PageType =
   | "pi"
   | "people"
   | "portfolio"
+  | "research"
   | "openings"
   | "credits";

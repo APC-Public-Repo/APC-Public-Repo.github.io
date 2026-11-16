@@ -3,16 +3,23 @@
 // build time: no API key ships to the browser and no request happens when a
 // visitor loads the page. An Airtable edit becomes live on the next build.
 //
+// Attachments are downloaded into public/cms/ during the same run, because an
+// Airtable attachment URL expires a couple of hours after it is handed out.
+// The JSON stores the local path, so the images keep working.
+//
 // Needs AIRTABLE_TOKEN (personal access token, data.records:read on the base)
 // and AIRTABLE_BASE_ID. Without them the script leaves the committed JSON
 // alone, so local dev and a build with no secrets both still work.
 //
 // Run it with: node scripts/airtable-sync.mjs
 
-import { writeFile } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { extname } from 'node:path';
 
 const TOKEN = process.env.AIRTABLE_TOKEN;
 const BASE_ID = process.env.AIRTABLE_BASE_ID;
+
+const ASSET_DIR = new URL('../public/cms/', import.meta.url);
 
 // jsonKey: [Airtable field name, kind]. 'text' is the default kind and may be
 // omitted. Renaming a column in Airtable means renaming it here too.
@@ -25,7 +32,7 @@ const TABLES = [
       role: ['Role'],
       group: ['Group'],
       affiliation: ['Affiliation'],
-      photo: ['Photo', 'attachment'],
+      photo: ['Photo', 'image'],
       bio: ['Bio'],
       email: ['Email'],
       scholar: ['Scholar'],
@@ -34,17 +41,20 @@ const TABLES = [
     },
   },
   {
-    file: 'portfolio',
-    table: 'Portfolio',
+    file: 'patents',
+    table: 'Patents',
     fields: {
-      title: ['Title'],
-      summary: ['Summary'],
-      category: ['Category'],
+      title: ['Judul Invensi'],
+      applicationNumber: ['Nomor Permohonan'],
+      patentNumber: ['Nomor Paten'],
+      filingDate: ['Tanggal Penerimaan'],
+      publicationDate: ['Tanggal Publikasi'],
+      inventors: ['Inventor', 'lines'],
+      holder: ['Pemegang Paten'],
+      type: ['Jenis Paten'],
       status: ['Status'],
-      year: ['Year'],
-      image: ['Image', 'attachment'],
-      link: ['Link'],
-      tags: ['Tags', 'list'],
+      ipc: ['Klasifikasi IPC'],
+      abstract: ['Abstrak'],
     },
   },
   {
@@ -60,16 +70,72 @@ const TABLES = [
       applyUrl: ['Apply URL'],
     },
   },
+  {
+    file: 'research',
+    table: 'Research Interests',
+    fields: {
+      title: ['Title'],
+      summary: ['Summary'],
+      body: ['Body'],
+      headline: ['Headline Image', 'image'],
+      attachments: ['Attachments', 'files'],
+      lead: ['Lead', 'person'],
+      members: ['Members', 'people'],
+    },
+    // Detail pages live at /research/<slug>, derived from the title.
+    slugFrom: 'title',
+  },
 ];
 
-export function read(value, kind) {
+const slugify = (text) =>
+  String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+// An Airtable attachment URL dies after a couple of hours, so keep the file.
+async function saveAttachment(attachment) {
+  const response = await fetch(attachment.url);
+
+  if (!response.ok) {
+    throw new Error(`attachment ${attachment.filename} responded ${response.status}`);
+  }
+
+  const name = attachment.id + (extname(attachment.filename ?? '') || '.bin');
+  await writeFile(
+    new URL(name, ASSET_DIR),
+    Buffer.from(await response.arrayBuffer()),
+  );
+
+  // Relative on purpose: the pages prefix it with import.meta.env.BASE_URL.
+  return `cms/${name}`;
+}
+
+export async function read(value, kind, context = {}) {
+  const names = context.people ?? new Map();
+
   switch (kind) {
-    // Attachment fields arrive as an array of objects; the page wants one URL.
-    case 'attachment':
-      return Array.isArray(value) ? (value[0]?.url ?? '') : '';
+    case 'image':
+      return Array.isArray(value) && value[0] ? saveAttachment(value[0]) : '';
+    case 'files':
+      return Array.isArray(value)
+        ? Promise.all(
+            value.map(async (attachment) => ({
+              name: attachment.filename ?? '',
+              path: await saveAttachment(attachment),
+            })),
+          )
+        : [];
+    // Linked records arrive as record ids, so swap them for People names.
+    case 'person':
+      return Array.isArray(value) ? (names.get(value[0]) ?? '') : '';
+    case 'people':
+      return Array.isArray(value)
+        ? value.map((id) => names.get(id) ?? '').filter(Boolean)
+        : [];
     case 'list':
       return Array.isArray(value) ? value.map(String) : [];
-    // One requirement per line in an Airtable long-text field.
+    // One item per line in an Airtable long-text field.
     case 'lines':
       return String(value ?? '')
         .split('\n')
@@ -78,6 +144,42 @@ export function read(value, kind) {
     default:
       return value == null ? '' : String(value);
   }
+}
+
+export async function toRows(records, fields, options = {}) {
+  const published = records
+    // Airtable omits an unticked checkbox from the API response, so a row
+    // counts as published only when Published comes back as true.
+    .filter((record) => record.fields.Published === true)
+    .sort(
+      (a, b) => (a.fields.Order ?? Infinity) - (b.fields.Order ?? Infinity),
+    );
+
+  const rows = [];
+
+  for (const record of published) {
+    const row = { id: record.id };
+
+    for (const [key, [field, kind]] of Object.entries(fields)) {
+      row[key] = await read(record.fields[field], kind, options);
+    }
+
+    if (options.slugFrom) {
+      const base = slugify(row[options.slugFrom]) || record.id;
+      let slug = base;
+
+      // Two rows with the same title would otherwise share one URL.
+      for (let n = 2; rows.some((other) => other.slug === slug); n += 1) {
+        slug = `${base}-${n}`;
+      }
+
+      row.slug = slug;
+    }
+
+    rows.push(row);
+  }
+
+  return rows;
 }
 
 async function fetchRecords(table) {
@@ -109,34 +211,6 @@ async function fetchRecords(table) {
   return records;
 }
 
-export function toRows(records, fields) {
-  return records
-    // Airtable omits an unticked checkbox from the API response, so a row
-    // counts as published only when Published comes back as true.
-    .filter((record) => record.fields.Published === true)
-    .sort(
-      (a, b) => (a.fields.Order ?? Infinity) - (b.fields.Order ?? Infinity),
-    )
-    .map((record) => {
-      const row = { id: record.id };
-      for (const [key, [field, kind]] of Object.entries(fields)) {
-        row[key] = read(record.fields[field], kind);
-      }
-      return row;
-    });
-}
-
-async function sync({ file, table, fields }) {
-  const rows = toRows(await fetchRecords(table), fields);
-
-  await writeFile(
-    new URL(`../src/content/${file}.json`, import.meta.url),
-    JSON.stringify(rows, null, 2) + '\n',
-  );
-
-  console.log(`${file}.json: ${rows.length} rows from "${table}"`);
-}
-
 // Only run when invoked directly. The self-check imports the helpers above.
 if (process.argv[1]?.endsWith('airtable-sync.mjs')) {
   if (!TOKEN || !BASE_ID) {
@@ -146,16 +220,42 @@ if (process.argv[1]?.endsWith('airtable-sync.mjs')) {
     process.exit(0);
   }
 
+  // Stale files would pile up run after run, so start the asset folder empty.
+  await rm(ASSET_DIR, { recursive: true, force: true });
+  await mkdir(ASSET_DIR, { recursive: true });
+
   let failed = false;
 
-  for (const config of TABLES) {
+  // Research interests point at People rows, so the names have to exist first.
+  const people = new Map();
+
+  try {
+    for (const record of await fetchRecords('People')) {
+      people.set(record.id, String(record.fields.Name ?? ''));
+    }
+  } catch (error) {
+    failed = true;
+    console.error(`People lookup unavailable: ${error.message}`);
+  }
+
+  for (const { file, table, fields, slugFrom } of TABLES) {
     try {
-      await sync(config);
+      const rows = await toRows(await fetchRecords(table), fields, {
+        people,
+        slugFrom,
+      });
+
+      await writeFile(
+        new URL(`../src/content/${file}.json`, import.meta.url),
+        JSON.stringify(rows, null, 2) + '\n',
+      );
+
+      console.log(`${file}.json: ${rows.length} rows from "${table}"`);
     } catch (error) {
       // Keep the committed JSON rather than publishing an empty page, but make
       // the CI step go red so a renamed column cannot rot unnoticed.
       failed = true;
-      console.error(`${config.file}.json left unchanged: ${error.message}`);
+      console.error(`${file}.json left unchanged: ${error.message}`);
     }
   }
 

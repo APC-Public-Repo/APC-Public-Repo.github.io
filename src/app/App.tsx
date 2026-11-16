@@ -12,20 +12,24 @@ import { ContactPage } from './components/ContactPage';
 import { PIPage } from './components/PIPage';
 import { PeoplePage } from './components/PeoplePage';
 import { PortfolioPage } from './components/PortfolioPage';
+import { ResearchPage } from './components/ResearchPage';
 import { OpeningsPage } from './components/OpeningsPage';
 import { CreditsPage } from './components/CreditsPage';
+import { researchInterests } from './content';
 import type { PageType } from './types/navigation';
 
-type Navigate = (page: PageType) => void;
+type Navigate = (page: PageType, slug?: string) => void;
 
 interface PageDef {
   path: string;
-  title: string;
-  render: (navigate: Navigate) => ReactNode;
+  // A function when the tab name depends on which record is open.
+  title: string | ((slug?: string) => string);
+  render: (navigate: Navigate, slug?: string) => ReactNode;
 }
 
 // The whole router. To add a page: add it to PageType, then add one entry here.
 // URL, document title and content stay in the same place on purpose.
+// A page also answers to `<path>/<slug>`, which arrives as the slug argument.
 const PAGES: Record<PageType, PageDef> = {
   home: {
     path: '/',
@@ -72,7 +76,16 @@ const PAGES: Record<PageType, PageDef> = {
   portfolio: {
     path: '/portfolio',
     title: 'Portfolio',
-    render: () => <PortfolioPage />,
+    render: (navigate) => <PortfolioPage onNavigate={navigate} />,
+  },
+  research: {
+    path: '/research',
+    title: (slug) =>
+      researchInterests.find((interest) => interest.slug === slug)?.title ??
+      'Research Interests',
+    render: (navigate, slug) => (
+      <ResearchPage slug={slug} onNavigate={navigate} />
+    ),
   },
   openings: {
     path: '/openings',
@@ -91,29 +104,48 @@ const siteName = 'Applied Physics & Chemistry, Nano Center Indonesia';
 // '' at the domain root, '/repo' on a GitHub Pages project site.
 const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
 
-const urlFor = (page: PageType) => basePath + PAGES[page].path;
+const pageKeys = Object.keys(PAGES) as PageType[];
 
-function getPageFromPath(pathname: string): PageType {
+interface Route {
+  page: PageType;
+  slug?: string;
+}
+
+const urlFor = ({ page, slug }: Route) =>
+  basePath + PAGES[page].path + (slug ? `/${slug}` : '');
+
+function getRouteFromPath(pathname: string): Route {
   const path =
     (pathname.startsWith(basePath) ? pathname.slice(basePath.length) : pathname)
       .replace(/\/+$/, '') || '/';
-  const match = (Object.keys(PAGES) as PageType[]).find(
-    (page) => PAGES[page].path === path,
+
+  const exact = pageKeys.find((page) => PAGES[page].path === path);
+  if (exact) return { page: exact };
+
+  // '/research/perovskite-thin-films' opens the research page on that record.
+  const nested = pageKeys.find(
+    (page) =>
+      PAGES[page].path !== '/' && path.startsWith(`${PAGES[page].path}/`),
   );
-  return match ?? 'home';
+
+  if (nested) {
+    return { page: nested, slug: path.slice(PAGES[nested].path.length + 1) };
+  }
+
+  return { page: 'home' };
 }
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>(() =>
-    getPageFromPath(window.location.pathname),
+  const [route, setRoute] = useState<Route>(() =>
+    getRouteFromPath(window.location.pathname),
   );
 
   useEffect(() => {
     // Unknown path (or /index.html) falls back to home, so correct the URL.
-    window.history.replaceState(null, '', urlFor(currentPage));
+    window.history.replaceState(null, '', urlFor(route));
 
     const handlePopState = () => {
-      setCurrentPage(getPageFromPath(window.location.pathname));
+      setRoute(getRouteFromPath(window.location.pathname));
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -121,15 +153,18 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    document.title = `${PAGES[currentPage].title} | ${siteName}`;
-  }, [currentPage]);
+    const { title } = PAGES[route.page];
+    const name = typeof title === 'function' ? title(route.slug) : title;
 
-  const navigate: Navigate = (page) => {
-    const samePage = page === currentPage;
+    document.title = `${name} | ${siteName}`;
+  }, [route]);
+
+  const navigate: Navigate = (page, slug) => {
+    const samePage = page === route.page && slug === route.slug;
 
     if (!samePage) {
-      window.history.pushState(null, '', urlFor(page));
-      setCurrentPage(page);
+      window.history.pushState(null, '', urlFor({ page, slug }));
+      setRoute({ page, slug });
     }
 
     // A new page opens at the top at once. Smooth scrolling is for staying put.
@@ -138,9 +173,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navigation onNavigate={navigate} currentPage={currentPage} />
+      <Navigation onNavigate={navigate} currentPage={route.page} />
 
-      {PAGES[currentPage].render(navigate)}
+      {PAGES[route.page].render(navigate, route.slug)}
 
       <Footer onNavigate={navigate} />
     </div>

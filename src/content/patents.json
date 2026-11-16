@@ -1,0 +1,52 @@
+[
+  {
+    "id": "rec_dummy_patent_01",
+    "title": "Dummy Invensi: Metode Sintesis Lapisan Tipis Perovskit",
+    "applicationNumber": "P00202412345",
+    "patentNumber": "IDP000098765",
+    "filingDate": "2024-03-18",
+    "publicationDate": "2025-01-20",
+    "inventors": [
+      "Arramel, Ph.D.",
+      "Dummy Researcher One"
+    ],
+    "holder": "PT. Nanotech Indonesia Global Tbk",
+    "type": "Paten",
+    "status": "Terdaftar",
+    "ipc": "C23C 14/08",
+    "abstract": "Entri placeholder. Ganti baris ini di Airtable. Abstrak berisi ringkasan invensi sesuai format DJKI."
+  },
+  {
+    "id": "rec_dummy_patent_02",
+    "title": "Dummy Invensi: Alat Ukur Konduktivitas Permukaan Empat Titik",
+    "applicationNumber": "S00202456789",
+    "patentNumber": "",
+    "filingDate": "2024-11-04",
+    "publicationDate": "",
+    "inventors": [
+      "Dummy Researcher Two"
+    ],
+    "holder": "Yayasan Pusat Penelitian dan Pengembangan Nanoteknologi Indonesia",
+    "type": "Paten Sederhana",
+    "status": "Dalam Proses",
+    "ipc": "G01R 27/08",
+    "abstract": "Entri placeholder. Ganti baris ini di Airtable."
+  },
+  {
+    "id": "rec_dummy_patent_03",
+    "title": "Dummy Invensi: Komposit Katalis Berbasis Material Dua Dimensi",
+    "applicationNumber": "P00202298765",
+    "patentNumber": "IDP000054321",
+    "filingDate": "2022-07-29",
+    "publicationDate": "2023-05-12",
+    "inventors": [
+      "Arramel, Ph.D.",
+      "Dummy Alumni One"
+    ],
+    "holder": "PT. Nanotech Indonesia Global Tbk",
+    "type": "Paten",
+    "status": "Terdaftar",
+    "ipc": "B01J 21/18",
+    "abstract": "Entri placeholder. Ganti baris ini di Airtable."
+  }
+]

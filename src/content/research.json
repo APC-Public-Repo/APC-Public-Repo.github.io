@@ -1,0 +1,40 @@
+[
+  {
+    "id": "rec_dummy_research_01",
+    "slug": "two-dimensional-material-interfaces",
+    "title": "Two-Dimensional Material Interfaces",
+    "summary": "Placeholder entry. Edit or delete this row in Airtable.",
+    "body": "Longer description of the research interest goes in the Body field in Airtable. One paragraph per blank line.\n\nThe second paragraph renders separately, so write the way you would in any document.",
+    "headline": "",
+    "attachments": [],
+    "lead": "Arramel, Ph.D.",
+    "members": [
+      "Dummy Researcher One",
+      "Dummy Intern One"
+    ]
+  },
+  {
+    "id": "rec_dummy_research_02",
+    "slug": "perovskite-thin-films",
+    "title": "Perovskite Thin Films",
+    "summary": "Placeholder entry. Edit or delete this row in Airtable.",
+    "body": "Longer description of the research interest goes in the Body field in Airtable.",
+    "headline": "",
+    "attachments": [],
+    "lead": "Dummy Researcher One",
+    "members": [
+      "Dummy Researcher Two"
+    ]
+  },
+  {
+    "id": "rec_dummy_research_03",
+    "slug": "catalysis-and-surface-chemistry",
+    "title": "Catalysis and Surface Chemistry",
+    "summary": "Placeholder entry. Edit or delete this row in Airtable.",
+    "body": "Longer description of the research interest goes in the Body field in Airtable.",
+    "headline": "",
+    "attachments": [],
+    "lead": "Dummy Researcher Two",
+    "members": []
+  }
+]

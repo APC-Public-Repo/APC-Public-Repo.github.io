@@ -1,9 +1,6 @@
 import { CalendarClock, MapPin } from "lucide-react";
-import openingsData from "../../content/openings.json";
-import type { Opening } from "../types/content";
+import { openings } from "../content";
 import type { PageType } from "../types/navigation";
-
-const openings = openingsData as Opening[];
 
 // An ISO date reads better spelled out. Anything else prints as entered.
 function formatDeadline(deadline: string) {

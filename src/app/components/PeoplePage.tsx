@@ -2,11 +2,9 @@ import { Mail } from "lucide-react";
 import scholarLogo from "../../imports/google-scholar.svg";
 import linkedinLogo from "../../imports/linkedin.svg";
 import orcidLogo from "../../imports/orcid.svg";
-import peopleData from "../../content/people.json";
+import { assetUrl, people } from "../content";
 import type { Person, PersonGroup } from "../types/content";
 import type { PageType } from "../types/navigation";
-
-const people = peopleData as Person[];
 
 // Section order on the page. A group with no rows is skipped.
 const GROUPS: { group: PersonGroup; heading: string; blurb: string }[] = [
@@ -53,7 +51,7 @@ function PersonCard({ person }: { person: Person }) {
 
       {person.photo ? (
         <img
-          src={person.photo}
+          src={assetUrl(person.photo)}
           alt={person.name}
           className="w-28 h-28 rounded-full object-cover shadow-md"
         />

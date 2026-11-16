@@ -19,13 +19,16 @@ its `path`, document `title` and `render`. To add a page, add the key to
 `PageType` in `src/app/types/navigation.ts` and one entry to `PAGES`. Nothing
 else needs editing. `pnpm typecheck` fails if the two disagree.
 
+A page also answers to `<path>/<slug>`: `/research/perovskite-thin-films` opens
+the `research` page with that slug, and `PageDef.title` may be a function of it.
+
 `Navigation.tsx` keeps its own `navItems`. An item has either `page` (routes
 inside the app) or `href` (links out), never both.
 
 ## CMS (Airtable)
 
-`/people`, `/portfolio` and `/openings` render from `src/content/*.json`, which
-the pages import directly. `scripts/airtable-sync.mjs` rewrites those files from
+`/people`, `/portfolio`, `/research/<slug>` and `/openings` render from
+`src/content/*.json`, read through `src/app/content.ts`. `scripts/airtable-sync.mjs` rewrites those files from
 Airtable at build time, so the content is baked into the bundle: no API token
 reaches the browser and no request happens when a visitor loads the page. The
 committed JSON is the fallback, and it currently holds dummy rows.
@@ -51,8 +54,15 @@ ascending, blanks last).
 | Table | Columns |
 | --- | --- |
 | `People` | Name, Role, Group (`PI`/`Team`/`Intern`/`Alumni`), Affiliation, Photo (attachment), Bio, Email, Scholar, LinkedIn, ORCID |
-| `Portfolio` | Title, Summary, Category, Status, Year, Image (attachment), Link, Tags (multi-select) |
+| `Patents` | Judul Invensi, Nomor Permohonan, Nomor Paten, Tanggal Penerimaan, Tanggal Publikasi, Inventor (long text, one per line), Pemegang Paten, Jenis Paten, Status, Klasifikasi IPC, Abstrak |
+| `Research Interests` | Title, Summary, Body (long text, blank line between paragraphs), Headline Image (attachment), Attachments (attachment), Lead (link to People), Members (link to People) |
 | `Openings` | Title, Type, Location, Deadline, Summary, Requirements (long text, one per line), Apply URL |
+
+Patent columns follow the DJKI register, so they stay in Indonesian on the page
+as well. Research interest URLs come from the title, so renaming one changes its
+link. Attachments are downloaded into `public/cms/` during the sync, because an
+Airtable attachment URL expires a few hours after Airtable hands it out; the
+JSON stores the local path and the pages prefix it with `assetUrl()`.
 
 ## State
 
